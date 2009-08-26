@@ -5,7 +5,7 @@
  * The software in this package is published under the terms of the AGPL license      *
  * a copy of which has been included with this distribution in the license.txt file.  *
  **************************************************************************************/
-package org.fusesource.mvnplugins.visualdeps;
+package org.fusesource.mvnplugins.graph;
 
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.plugin.MojoExecutionException;

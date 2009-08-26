@@ -23,11 +23,11 @@
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
   
-  <name>The Maven Plugins Common POM</name>
-  <description>Holds common metadata shared by the maven modules in the mvnplugins project.</description>
+  <name>FUSE Maven Plugins</name>
+  <description>A collection of random yet handy Maven plugins.</description>
 
   <modules>
-    <module>visualdeps</module>
+    <module>maven-graph-plugin</module>
   </modules>
 
   <properties>

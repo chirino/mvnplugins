@@ -1,0 +1,82 @@
+ ------
+ Introduction
+ ------
+ Hiram Chirino
+ ------
+ 2009-08-26
+ ------
+ 
+Maven Graph Plugin
+
+  This plugin uses the {{{http://www.graphviz.org/} graphviz}} command line tool 'dot' to generate a graphical
+  representation of the project dependencies.  You will need to install it and add it to your PATH
+  before you can use this plugin.
+
+* Goals Overview
+
+  * {{{project-mojo.html}graph:project}} generates a graph the dependencies of the current project.
+  
+  * {{{reactor-mojo.html}graph:reactor}} generates aggregate graph of all the dependencies 
+    of the projects in the current multi-module (a.k.a. reactor) build.
+
+* Example Graph
+
+  The following graph was generated using {{{project-mojo.html}graph:project}}. Notice that the different 
+  dependency types are displayed differently.  When using {{{reactor-mojo.html}graph:reactor}} on multi module build,
+  you will understand why the project's modules are displayed a little larger.
+
+[images/project-graph.png] Example Graph
+
+* Usage
+
+  The easiest way to get started using the Maven Graph Plugin is add the following 'graph' profile to your
+  to your project's pom:
+
++--------------------------------------------------------------------------
+<project>
+  <profiles>
+  
+    <profile>
+      <id>graph</id>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>mvnplugins.fusesource.org</id>
+          <url>http://mvnplugins.fusesource.org/repo/release</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </pluginRepository>
+      </pluginRepositories>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
+            <version>${project.version}</version>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    
+  </profiles>
+</project>  
++--------------------------------------------------------------------------
+
+  Then you can generated the dependency graphs by running:
+  
+--------------------------------------------------------------------------
+$ mvn -P graph graph:project
+ -- OR --
+$ mvn -P graph graph:reactor
+--------------------------------------------------------------------------  
+
+  You can exclude certain types of dependencies from being included in your graph by setting 
+  some maven properties.  For example, to omit the dependencies in the testing scope
+  and dependencies which are optional, you would use the following options:
+  
+--------------------------------------------------------------------------
+$ mvn -P graph graph:reactor -Dhide-scope=test -Dhide-optional=true
+--------------------------------------------------------------------------  
+  
+  To see the full list options options supported to customize your graph
+  output please see the {{{plugin-info.html}goal reference}}.
