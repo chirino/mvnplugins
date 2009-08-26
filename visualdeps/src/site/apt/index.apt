@@ -1,10 +1,20 @@
- -----
- maven visualdeps plugin
- -----
- -----
- 26 Jan 2007
- -----
+ ------
+ Introduction
+ ------
+ Hiram Chirino
+ ------
+ 2009-08-26
+ ------
+ 
+Maven Visual Dependencies Plugin
 
-Maven Plugin to Visualize Dependencies.
-  
-  See {{{plugin-info.html}plugin reference}}.
+  This plugin uses the {{{http://www.graphviz.org/} graphviz}} command line tool 'dot' to generate a graphical
+  representation of the project dependencies.
+
+* Goals Overview
+
+  * {{{visualdeps-mojo.html}visualdeps:visualdeps}} generates a graph of the project dependencies.
+
+* Usage
+
+  General instructions on how to use the Plugin Name can be found on the {{{plugin-info.html}usage page}}.
