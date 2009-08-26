@@ -35,6 +35,11 @@
   <url>http://${forge-project-id}.fusesource.org</url>
   <inceptionYear>2009</inceptionYear>
 
+  <organization>
+    <name>Progress Software Inc.</name>
+    <url>http://fusesource.com/</url>
+  </organization> 
+
   <issueManagement>
     <system>jira</system>
     <url>http://fusesource.com/issues/browse/${forge-project-id-uc}</url>
@@ -124,6 +129,7 @@
     </plugins>
   </build>
 
+<!--
   <reporting>
     <plugins>
       <plugin>
@@ -131,18 +137,8 @@
         <artifactId>maven-pmd-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>mailing-list</report>
-              <report>issue-tracking</report>
-              <report>license</report>
-              <report>scm</report>
-            </reports>
-          </reportSet>
-        </reportSets>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -169,5 +165,6 @@
       </plugin>
     </plugins>
   </reporting>
+-->
 
 </project>

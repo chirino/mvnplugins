@@ -1,0 +1,10 @@
+ -----
+ maven visualdeps plugin
+ -----
+ -----
+ 26 Jan 2007
+ -----
+
+Maven Plugin to Visualize Dependencies.
+  
+  See {{{plugin-info.html}plugin reference}}.
