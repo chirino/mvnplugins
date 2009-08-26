@@ -26,6 +26,10 @@
   <name>The Maven Plugins Common POM</name>
   <description>Holds common metadata shared by the maven modules in the mvnplugins project.</description>
 
+  <modules>
+    <module>visualdeps</module>
+  </modules>
+
   <properties>
     <forge-project-id>mvnplugins</forge-project-id>
     <forge-project-id-uc>MVNPLUGINS</forge-project-id-uc>
