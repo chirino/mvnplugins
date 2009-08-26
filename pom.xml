@@ -21,7 +21,7 @@
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>mvnplugins</artifactId>
   <packaging>pom</packaging>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   
   <name>The Maven Plugins Common POM</name>
   <description>Holds common metadata shared by the maven modules in the mvnplugins project.</description>
