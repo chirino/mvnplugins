@@ -33,7 +33,6 @@
   <properties>
     <forge-project-id>mvnplugins</forge-project-id>
     <forge-project-id-uc>MVNPLUGINS</forge-project-id-uc>
-    <site-name>${project.artifactId}-${project.version}</site-name>
   </properties>
 
   <url>http://${forge-project-id}.fusesource.org</url>
@@ -91,7 +90,7 @@
     <site>
       <id>website.fusesource.org</id>
       <name>website</name>
-      <url>dav:http://fusesource.com/forge/dav/${forge-project-id}/maven/${site-name}</url>
+      <url>dav:http://fusesource.com/forge/dav/${forge-project-id}/maven/${project.version}</url>
     </site>
   </distributionManagement> 
 
