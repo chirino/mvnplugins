@@ -1,0 +1,512 @@
+/**************************************************************************************
+ * Copyright (C) 2009 Progress Software, Inc. All rights reserved.                    *
+ * http://fusesource.com                                                              *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the AGPL license      *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
+package org.fusesource.mvnplugins.visualdeps;
+
+import org.apache.maven.shared.dependency.tree.DependencyNode;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.artifact.Artifact;
+import org.codehaus.plexus.util.cli.*;
+import org.codehaus.plexus.util.FileUtils;
+
+import java.util.*;
+import java.io.File;
+import java.io.PrintStream;
+
+/**
+ * @author chirino
+ */
+public class DependencyVisualizer {
+
+    LinkedHashMap<String, Node> nodes = new LinkedHashMap<String, Node>();
+    LinkedHashSet<Edge> edges = new LinkedHashSet<Edge>();
+    HashSet<String> hideScopes = new HashSet<String>();
+    boolean hideOptional;
+    boolean hidePoms;
+    boolean hideOmitted;
+    String label;
+    boolean hideTransitive;
+
+    private class Node {
+        private final String id;
+        private final ArrayList<Edge> children = new ArrayList<Edge>();
+        private final ArrayList<Edge> parents = new ArrayList<Edge>();
+        private final Artifact artifact;
+        private int roots;
+
+        public Node(Artifact artifact) {
+            this.artifact = artifact;
+            this.id = artifact.getId();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return id.equals(((Node) obj).id);
+        }
+
+        @Override
+        public int hashCode() {
+            return id.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return id;
+        }
+
+        public boolean isHidden() {
+            if ( hidePoms && isType("pom") ) {
+                return true;
+            }
+            return false;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getLabel() {
+            final Artifact a = artifact;
+            StringBuilder sb = new StringBuilder();
+            sb.append( a.getGroupId());
+            sb.append("\\n" +a.getArtifactId());
+            if (!isType("jar")) {
+                sb.append("\\n" + a.getType() +
+                        (a.getClassifier()==null? "" : (":" + a.getClassifier()))
+                );
+            }
+            sb.append("\\n" + a.getVersion());
+            return sb.toString();
+        }
+
+        public String getColor() {
+            if (!parents.isEmpty() && allMatchScope(parents, "test")) {
+                return "cornflowerblue";
+            }
+            return "black";
+        }
+        public String getFillColor() {
+            if( roots > 0 ) {
+                return "#dddddd"; 
+            }
+            return "white";
+        }
+        public String getFontColor() {
+            return getColor();
+        }
+
+        public String getLineStyle() {
+            String rc = isOptional() ? "dotted" : "solid";
+            rc += ",filled";
+            return rc;
+        }
+
+        public double getFontSize() {
+            if( roots > 0 ) {
+                return 14;
+            }
+            return 8;
+        }
+
+        public boolean isOptional() {
+            return !parents.isEmpty() && allMatchOptional(parents, true);
+        }
+
+
+        private boolean allMatchScope(ArrayList<Edge> edges, String scope) {
+            for (Edge e : edges) {
+                if (!e.isScope(scope)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private boolean allMatchOptional(ArrayList<Edge> edges, boolean value) {
+            for (Edge e : edges) {
+                if (e.optional != value) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean isType(String value) {
+            return value.equals(artifact.getType());
+        }
+
+        public int getRecursiveChildCount() {
+            int rc = children.size();
+            for (Edge child : children) {
+                int t = child.getRecursiveChildCount();
+                if( t > rc ) {
+                    rc = t;
+                }
+            }
+            return rc;
+        }
+
+    }
+
+    private class Edge {
+        private final Node parent;
+        private final Node child;
+        private final String scope;
+        private final boolean optional;
+        private final DependencyNode dependencyNode;
+
+        public Edge(Node parent, Node child, DependencyNode dependencyNode) {
+            this.parent = parent;
+            this.child = child;
+            this.dependencyNode = dependencyNode;
+            this.scope = dependencyNode.getArtifact().getScope();
+            this.optional = dependencyNode.getArtifact().isOptional();
+        }
+
+        public Edge(Edge edge, boolean optional) {
+            this.parent = edge.parent;
+            this.child = edge.child;
+            this.dependencyNode = edge.dependencyNode;
+            this.scope = edge.scope;
+            this.optional = optional;
+        }
+
+        public boolean isHidden() {
+            if( hideTransitive && dependencyNode.getParent().getParent()!=null ) {
+                return true;
+            }
+            if(hideOptional && optional)
+                return true;
+            if(hideScopes.contains(scope) )
+                return true;
+            if(hideOmitted && dependencyNode.getState()!=DependencyNode.INCLUDED)
+                return true;
+            return false;
+        }
+
+        public boolean isScope(String s) {
+            return scope.equals(s);
+        }
+
+        public String getLineStyle() {
+            if( optional ) {
+                return "dotted";
+            }
+            return "solid";
+        }
+
+        public String getLabel() {
+            StringBuilder sb = new StringBuilder();
+            if ( !isScope("compile")) {
+                sb.append(scope);
+            }
+            if ( optional ) {
+                if( sb.length()!=0 ) {
+                    sb.append(",");
+                }
+                sb.append("optional");
+            }
+            return sb.toString();
+        }
+
+        public String getColor() {
+            if (isScope("test")) {
+                return "cornflowerblue";
+            }
+            return "black";
+        }
+
+        double getWeight() {
+            double rc = 1 + getRecursiveChildCount();
+
+            if ( isScope("compile")) {
+                rc *= 2;
+            }
+            if ( !optional ) {
+                rc *= 2;
+            }
+            return rc;
+        }
+
+        private int getRecursiveChildCount() {
+            return child.getRecursiveChildCount();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Edge edge = (Edge) o;
+
+            if (parent != null ? !parent.equals(edge.parent) : edge.parent != null) return false;
+            if (child != null ? !child.equals(edge.child) : edge.child != null) return false;
+            if (scope != null ? !scope.equals(edge.scope) : edge.scope != null) return false;
+            if (optional != edge.optional) return false;
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = parent != null ? parent.hashCode() : 0;
+            result = 31 * result + (child != null ? child.hashCode() : 0);
+            result = 31 * result + (scope != null ? scope.hashCode() : 0);
+            result = 31 * result + (optional ? 1 : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Edge{" +
+                    "parent=" + parent +
+                    ", child=" + child +
+                    ", scope='" + scope + '\'' +
+                    ", optional=" + optional +
+                    '}';
+        }
+    }
+
+    public void add(DependencyNode dn) {
+        add(dn, true);
+    }
+
+    private Node add(DependencyNode dn, boolean root) {
+        Node parent = getNode(dn);
+        if( root ) {
+            parent.roots++;
+        }
+        if (dn.hasChildren()) {
+            for (DependencyNode c : (List<DependencyNode>) dn.getChildren()) {
+                Node child = add(c, false);
+                Edge edge = new Edge(parent, child, c);
+                add(edge);
+            }
+        }
+        return parent;
+    }
+
+    private Node getNode(DependencyNode dn) {
+        String id = dn.getArtifact().getId();
+        Node node = nodes.get(id);
+        if (node == null) {
+            node = new Node(dn.getArtifact());
+            nodes.put(id, node);
+        }
+        return node;
+    }
+
+    private void add(Edge edge) {
+        if (edges.add(edge)) {
+            edge.child.parents.add(edge);
+            edge.parent.children.add(edge);
+        }
+    }
+
+    private void remove(Node node) {
+        nodes.remove(node.getId());
+
+        // Remove the edges attached to this node...
+        for (Edge edge : new ArrayList<Edge>(node.parents)) {
+            remove(edge);
+        }
+        for (Edge edge : new ArrayList<Edge>(node.children)) {
+            remove(edge);
+        }
+    }
+
+    private void remove(Edge edge) {
+        edge.parent.children.remove(edge);
+        edge.child.parents.remove(edge);
+        edges.remove(edge);
+    }
+
+    public void export(File target) throws MojoExecutionException {
+
+        // Drop nodes and edges which are hidden...
+        for (Node node : new ArrayList<Node>(nodes.values()) ) {
+            if (node.isHidden()) {
+                remove(node);
+            }
+        }
+        for (Edge edge : new ArrayList<Edge>(edges) ) {
+            if (edge.isHidden()) {
+                remove(edge);
+            }
+
+        }
+
+        // Propagate the optional attribute down to the children.
+        LinkedList<Node> ll = new LinkedList<Node>(nodes.values());
+        while( !ll.isEmpty() ) {
+            Node node = ll.removeFirst();
+            if( node.isOptional() )  {
+                for (Edge edge : new ArrayList<Edge>(node.children)) {
+                    if( !edge.optional ) {
+                        remove(edge);
+                        add(new Edge(edge, true));
+
+                        // If a child filpped to optional.. then we need
+                        // to enqueue so we process it's children
+                        if( edge.child.isOptional() ) {
+                            ll.addLast(edge.child);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Remove all the non root nodes that are disconnected.
+        for (Node node : new ArrayList<Node>(nodes.values()) ) {
+            if (node.parents.size()==0 && node.roots==0) {
+                remove(node);
+            }
+        }
+
+
+
+        // Write the source file...
+        boolean convertDotFile=true;
+        File source = new File(target.getParentFile(), target.getName() + ".dot");
+
+        // User might just be requesting a dot file..
+        if( target.getName().endsWith(".dot") ) {
+            convertDotFile = false;
+            source = target;
+        }
+
+        PrintStream os = null;
+        try {
+            os = new PrintStream(source);
+            DotExporter exporter = new DotExporter(os);
+            exporter.export();
+        } catch (Exception e) {
+            throw new MojoExecutionException("Could not create the dot file used to generate the image.", e);
+        } finally {
+            os.close();
+        }
+
+
+        if (!convertDotFile) {
+            return;
+        }
+        
+        try {
+            Commandline commandline = new Commandline();
+            try {
+                commandline.addSystemEnvironment();
+            } catch (Exception ignore) {
+            }
+            commandline.setExecutable("dot");
+            commandline.addArguments(new String[]{
+                    "-T" + FileUtils.getExtension(target.getName()),
+                    "-o" + target.getAbsolutePath(),
+                    source.getAbsolutePath()
+            });
+
+            int rc = CommandLineUtils.executeCommandLine(commandline, new DefaultConsumer(), new DefaultConsumer());
+            if (rc != 0) {
+                throw new MojoExecutionException("Execution of the 'dot' command failed.  Perhaps it's not installed.  See: http://www.graphviz.org/");
+            }
+            source.delete();
+
+        } catch (CommandLineException e) {
+            throw new MojoExecutionException("Execution of the 'dot' command failed.", e);
+        }
+
+    }
+
+    private class DotExporter {
+        private final PrintStream out;
+        int indent = 0;
+
+        public DotExporter(PrintStream os) {
+            this.out = os;
+        }
+
+        public void export() {
+            p("digraph dependencies {").i(1);
+            {
+                p("graph [").i(1);
+                {
+                    if (label != null) {
+                        p("label=" + q(label));
+                    }
+                    p("labeljust=l");
+                    p("labelloc=t");
+                    p("fontsize=18");
+                    p("fontname=\"Serif\"");
+                    p("ranksep=1");
+                    p("rankdir=TB");
+                    p("nodesep=.05");
+
+                }
+                i(-1).p("];");
+                p("node [").i(1);
+                {
+                    p("fontsize=8");
+                    p("fontname=\"SanSerif\"");
+                    p("shape=\"rectangle\"");
+                }
+                i(-1).p("];");
+                p("edge [").i(1);
+                {
+                    p("fontsize=8");
+                    p("fontname=\"SanSerif\"");
+                }
+                i(-1).p("];");
+
+                // Write the nodes..
+                for (Node node : nodes.values()) {
+                    p(q(node.getId()) + " [").i(1);
+                    {
+                        p("fontsize="+node.getFontSize());
+                        p("label=" + q(node.getLabel()));
+                        p("color=" + q(node.getColor()));
+                        p("fontcolor=" + q(node.getFontColor()));
+                        p("fillcolor=" + q(node.getFillColor()));
+                        p("style=" + q(node.getLineStyle()));
+                    }
+                    i(-1).p("];");
+                }
+
+                // Write the edges..
+                for (Edge edge : edges) {
+                    p(q(edge.parent.getId()) + " -> " + q(edge.child.getId()) + " [").i(1);
+                    {
+                        p("label=" + q(edge.getLabel()));
+                        p("style=" + q(edge.getLineStyle()));
+                        p("color=" + q(edge.getColor()));
+                        p("fontcolor=" + q(edge.getColor()));
+                        p("weight=" + edge.getWeight());
+                    }
+                    i(-1).p("];");
+                }
+
+            }
+            i(-1).p("}");
+        }
+
+        private String q(String value) {
+            return "\"" + value + "\"";
+        }
+
+        private DotExporter i(int indent) {
+            this.indent += indent;
+            return this;
+        }
+
+        private DotExporter p(String x) {
+            for (int i = 0; i < indent; i++) {
+                out.print("  ");
+            }
+            out.println(x);
+            return this;
+        }
+
+    }
+
+
+}
