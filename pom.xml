@@ -21,7 +21,7 @@
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>mvnplugins</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   
   <name>FUSE Maven Plugins</name>
   <description>A collection of random yet handy Maven plugins.</description>
