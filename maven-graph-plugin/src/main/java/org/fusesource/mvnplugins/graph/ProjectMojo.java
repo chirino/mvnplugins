@@ -144,14 +144,39 @@ public class ProjectMojo extends AbstractMojo {
      */
     private String label;
 
+    /**
+     * If true then the 'test scope' and 'optional' attributes are cascaded
+     * down to the dependencies of the original node. 
+     *
+     * <br/>
+     * @parameter default-value="true" expression="${graph.cascade}"
+     */
+    boolean cascade;
+
+    /**
+     * The direction that the graph will be laid out in.
+     * it can be one of the following values:
+     * <br/>
+     * <code>TB LR BT RL <code>
+     * <br/>
+     * top to bottom, from left to right, from bottom to top, and from right to left, respectively
+     *
+     * <br/>
+     * @parameter default-value="TB" expression="${graph.direction}"
+     */
+    String direction;
+
     public void execute() throws MojoExecutionException {
         try {
             DependencyVisualizer visualizer = new DependencyVisualizer();
+            visualizer.cascade = cascade;
+            visualizer.direction = direction;
             visualizer.hideOptional = hideOptional;
             visualizer.hidePoms = hidePoms;
             visualizer.hideOmitted = hideOmitted;
             visualizer.label = label;
             visualizer.hideTransitive = hideTransitive;
+            visualizer.log = getLog();
 
             if (hideScopes != null) {
                 for (String scope : hideScopes.split(",")) {

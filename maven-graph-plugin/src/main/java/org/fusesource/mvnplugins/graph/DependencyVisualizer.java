@@ -9,6 +9,7 @@ package org.fusesource.mvnplugins.graph;
 
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.artifact.Artifact;
 import org.codehaus.plexus.util.cli.*;
 import org.codehaus.plexus.util.FileUtils;
@@ -30,6 +31,9 @@ public class DependencyVisualizer {
     boolean hideOmitted;
     String label;
     boolean hideTransitive;
+    Log log;
+    boolean cascade;
+    String direction="TB";
 
     private class Node {
         private final String id;
@@ -38,9 +42,9 @@ public class DependencyVisualizer {
         private final Artifact artifact;
         private int roots;
 
-        public Node(Artifact artifact) {
+        public Node(String id, Artifact artifact) {
+            this.id = id;
             this.artifact = artifact;
-            this.id = artifact.getId();
         }
 
         @Override
@@ -59,7 +63,7 @@ public class DependencyVisualizer {
         }
 
         public boolean isHidden() {
-            if ( hidePoms && isType("pom") ) {
+            if ( hidePoms && isExclusivelyType("pom") ) {
                 return true;
             }
             return false;
@@ -74,21 +78,32 @@ public class DependencyVisualizer {
             StringBuilder sb = new StringBuilder();
             sb.append( a.getGroupId());
             sb.append("\\n" +a.getArtifactId());
-            if (!isType("jar")) {
-                sb.append("\\n" + a.getType() +
-                        (a.getClassifier()==null? "" : (":" + a.getClassifier()))
-                );
+            if (!isExclusivelyType("jar")) {
+                sb.append("\\n");
+                boolean first=true;
+                for (String type : getTypes()) {
+                    if( !first  ) {
+                        sb.append(" | ");
+                    }
+                    first=false;
+                    sb.append(type);
+                }
             }
             sb.append("\\n" + a.getVersion());
             return sb.toString();
         }
 
         public String getColor() {
-            if (!parents.isEmpty() && allMatchScope(parents, "test")) {
+            if (isScope("test")) {
                 return "cornflowerblue";
             }
             return "black";
         }
+
+        private boolean isScope(String scope) {
+            return roots==0 && !parents.isEmpty() && allMatchScope(parents, scope);
+        }
+
         public String getFillColor() {
             if( roots > 0 ) {
                 return "#dddddd"; 
@@ -113,7 +128,7 @@ public class DependencyVisualizer {
         }
 
         public boolean isOptional() {
-            return !parents.isEmpty() && allMatchOptional(parents, true);
+            return roots==0 && !parents.isEmpty() && allMatchOptional(parents, true);
         }
 
 
@@ -134,8 +149,19 @@ public class DependencyVisualizer {
             return true;
         }
 
-        private boolean isType(String value) {
-            return value.equals(artifact.getType());
+        private Set<String> getTypes() {
+            LinkedHashSet<String> rc = new LinkedHashSet<String>();
+            rc.add(artifact.getType() + (artifact.getClassifier()==null? "" : (":" + artifact.getClassifier())));
+            for (Edge e : parents) {
+                Artifact artifact = e.dependencyNode.getArtifact();
+                rc.add(artifact.getType() + (artifact.getClassifier()==null? "" : (":" + artifact.getClassifier())));
+            }
+            return rc;
+        }
+
+        private boolean isExclusivelyType(String value) {
+            Set<String> types = getTypes();
+            return types.size()==1 && types.contains(value); 
         }
 
         public int getRecursiveChildCount() {
@@ -152,11 +178,11 @@ public class DependencyVisualizer {
     }
 
     private class Edge {
-        private final Node parent;
-        private final Node child;
-        private final String scope;
-        private final boolean optional;
-        private final DependencyNode dependencyNode;
+        private Node parent;
+        private Node child;
+        private String scope;
+        private boolean optional;
+        private DependencyNode dependencyNode;
 
         public Edge(Node parent, Node child, DependencyNode dependencyNode) {
             this.parent = parent;
@@ -165,13 +191,30 @@ public class DependencyVisualizer {
             this.scope = dependencyNode.getArtifact().getScope();
             this.optional = dependencyNode.getArtifact().isOptional();
         }
-
-        public Edge(Edge edge, boolean optional) {
+        public Edge(Edge edge) {
             this.parent = edge.parent;
             this.child = edge.child;
             this.dependencyNode = edge.dependencyNode;
             this.scope = edge.scope;
-            this.optional = optional;
+            this.optional = edge.optional;
+        }
+
+        public Edge optional(boolean optional) {
+            if ( this.optional == optional) {
+                return this;
+            }
+            Edge rc =  new Edge(this);
+            rc.optional = optional;
+            return rc;
+        }
+        
+        public Edge scope(String scope) {
+            if ( this.scope.equals(scope) ) {
+                return this;
+            }
+            Edge rc =  new Edge(this);
+            rc.scope = scope;
+            return rc;
         }
 
         public boolean isHidden() {
@@ -182,8 +225,11 @@ public class DependencyVisualizer {
                 return true;
             if(hideScopes.contains(scope) )
                 return true;
-            if(hideOmitted && dependencyNode.getState()!=DependencyNode.INCLUDED)
+            
+            final int state = dependencyNode.getState();
+            if(hideOmitted && (state==DependencyNode.OMITTED_FOR_CONFLICT || state==DependencyNode.OMITTED_FOR_CYCLE) ) {
                 return true;
+            }
             return false;
         }
 
@@ -289,10 +335,14 @@ public class DependencyVisualizer {
     }
 
     private Node getNode(DependencyNode dn) {
-        String id = dn.getArtifact().getId();
+        Artifact artifact = dn.getArtifact();
+        String id = artifact.getGroupId()+":"+artifact.getArtifactId()+":"+artifact.getVersion();
+        if( artifact.getClassifier()!=null ) {
+            id += ":"+artifact.getClassifier();
+        }
         Node node = nodes.get(id);
         if (node == null) {
-            node = new Node(dn.getArtifact());
+            node = new Node(id, dn.getArtifact());
             nodes.put(id, node);
         }
         return node;
@@ -328,30 +378,52 @@ public class DependencyVisualizer {
         // Drop nodes and edges which are hidden...
         for (Node node : new ArrayList<Node>(nodes.values()) ) {
             if (node.isHidden()) {
+                log.debug("Dropping hidden node: "+node);
                 remove(node);
             }
         }
         for (Edge edge : new ArrayList<Edge>(edges) ) {
             if (edge.isHidden()) {
+                log.debug("Dropping hidden edge: "+edge);
                 remove(edge);
             }
 
         }
 
-        // Propagate the optional attribute down to the children.
-        LinkedList<Node> ll = new LinkedList<Node>(nodes.values());
-        while( !ll.isEmpty() ) {
-            Node node = ll.removeFirst();
-            if( node.isOptional() )  {
-                for (Edge edge : new ArrayList<Edge>(node.children)) {
-                    if( !edge.optional ) {
-                        remove(edge);
-                        add(new Edge(edge, true));
+        if ( cascade ) {
+            // Propagate the attributes down to the children.
 
-                        // If a child filpped to optional.. then we need
-                        // to enqueue so we process it's children
-                        if( edge.child.isOptional() ) {
-                            ll.addLast(edge.child);
+            LinkedList<Node> ll = new LinkedList<Node>(nodes.values());
+            while( !ll.isEmpty() ) {
+                // Optional propagates...
+                Node node = ll.removeFirst();
+                if( node.isOptional() )  {
+                    for (Edge edge : new ArrayList<Edge>(node.children)) {
+                        if( !edge.optional ) {
+                            remove(edge);
+                            add(edge.optional(true));
+
+                            // If a child filpped to optional.. then we need
+                            // to enqueue so we process it's children
+                            if( edge.child.isOptional() ) {
+                                ll.addLast(edge.child);
+                            }
+                        }
+                    }
+                }
+
+                // scope propagates....
+                if( node.isScope("test") )  {
+                    for (Edge edge : new ArrayList<Edge>(node.children)) {
+                        if( !edge.isScope("test") ) {
+                            remove(edge);
+                            add(edge.scope("test"));
+
+                            // If a child filpped to test.. then we need
+                            // to enqueue so we process it's children
+                            if( edge.child.isScope("test") ) {
+                                ll.addLast(edge.child);
+                            }
                         }
                     }
                 }
@@ -361,11 +433,10 @@ public class DependencyVisualizer {
         // Remove all the non root nodes that are disconnected.
         for (Node node : new ArrayList<Node>(nodes.values()) ) {
             if (node.parents.size()==0 && node.roots==0) {
+                log.debug("Dropping orphaned node: "+node);
                 remove(node);
             }
         }
-
-
 
         // Write the source file...
         boolean convertDotFile=true;
@@ -379,6 +450,7 @@ public class DependencyVisualizer {
 
         PrintStream os = null;
         try {
+            log.debug("Exporting to: "+source);
             os = new PrintStream(source);
             DotExporter exporter = new DotExporter(os);
             exporter.export();
@@ -406,10 +478,12 @@ public class DependencyVisualizer {
                     source.getAbsolutePath()
             });
 
+            log.debug("Executing dot command...");
             int rc = CommandLineUtils.executeCommandLine(commandline, new DefaultConsumer(), new DefaultConsumer());
             if (rc != 0) {
                 throw new MojoExecutionException("Execution of the 'dot' command failed.  Perhaps it's not installed.  See: http://www.graphviz.org/");
             }
+            log.debug("Graph generated. ");
             source.delete();
 
         } catch (CommandLineException e) {
@@ -439,7 +513,7 @@ public class DependencyVisualizer {
                     p("fontsize=18");
                     p("fontname=\"Serif\"");
                     p("ranksep=1");
-                    p("rankdir=TB");
+                    p("rankdir="+q(direction));
                     p("nodesep=.05");
 
                 }
