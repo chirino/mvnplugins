@@ -77,7 +77,7 @@ public class DefaultUberizer
                 id = jar.getName()+"."+counter++;
                 workDir = new File(targetDir, id);
             }
-            FileUtils.fileAppend(jarMappingTxt, id + "=" +jar.getPath());
+            FileUtils.fileAppend(jarMappingTxt, id + "=" +jar.getPath()+"\n");
 
             List jarFilters = getFilters(jar, filters);
             JarFile jarFile = new JarFile(jar);
@@ -108,7 +108,7 @@ public class DefaultUberizer
         for (Transformer transformer : transformers) {
             final String id = "process-" + (transformerCounter++);
             File xformWorkDir = new File(targetDir, id);
-            FileUtils.fileAppend(transformMappingTxt, id + "=" + transformer);
+            FileUtils.fileAppend(transformMappingTxt, id + "=" + transformer+"\n");
             transformer.process(xformWorkDir, tree);
         }
 
@@ -176,10 +176,13 @@ public class DefaultUberizer
         }
     }
 
-    private void getParentDirs(String path, ArrayList<String> dirs) {
-        int p = path.lastIndexOf("/", path.length() - 1);
+    static void getParentDirs(String path, ArrayList<String> dirs) {
+        if( path.length() < 2 ) {
+            return;
+        }
+        int p = path.lastIndexOf("/", path.length() - 2);
         if (p > 0) {
-            String dir = path.substring(0, p);
+            String dir = path.substring(0, p+1);
             dirs.add(dir);
             getParentDirs(dir, dirs);
         }

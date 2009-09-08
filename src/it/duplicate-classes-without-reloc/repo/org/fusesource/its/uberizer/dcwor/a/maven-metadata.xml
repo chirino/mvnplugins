@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><metadata>
-  <groupId>org.fusesource.mvnplugins.its.uber.dcwor</groupId>
+  <groupId>org.fusesource.its.uberizer.dcwor</groupId>
   <artifactId>a</artifactId>
   <version>0.1</version>
   <versioning>

@@ -47,6 +47,13 @@ public class DefaultUberizerTest extends TestCase {
             "org/codehaus/plexus/util/xml/Xpp3Dom",
             "org/codehaus/plexus/util/xml/pull.*"};
 
+    public void testGetParentDirs() {
+        ArrayList<String> rc = new ArrayList<String>();
+        DefaultUberizer.getParentDirs("a/b", rc);
+        assertEquals(1, rc.size());
+        assertEquals("a/", rc.get(0));
+    }
+
     public void testShaderWithStaticInitializedClass() throws Exception {
         Uberizer uberizer = new DefaultUberizer();
         Set sources = new LinkedHashSet();

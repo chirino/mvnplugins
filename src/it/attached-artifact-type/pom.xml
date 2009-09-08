@@ -22,18 +22,18 @@ under the License.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.fusesource.mvnplugins.its.uber.aat</groupId>
+  <groupId>org.fusesource.its.uberizer.aat</groupId>
   <artifactId>parent</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
 
   <name>MSHADE-46</name>
   <description>
-    Test that attached uber artifacts have the same type as the original main artifact.
+    Test that attached shaded artifacts have the same type as the original main artifact.
   </description>
 
   <modules>
-    <module>uber</module>
+    <module>shade</module>
     <module>consumer</module>
   </modules>
 
@@ -70,7 +70,7 @@ under the License.
           <version>2.2</version>
         </plugin>
         <plugin>
-          <groupId>org.fusesource.mvnplugins</groupId>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-uberize-plugin</artifactId>
           <version>@project.version@</version>
         </plugin>

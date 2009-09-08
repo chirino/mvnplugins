@@ -54,18 +54,24 @@
                   <exclude>xml-apis:xml-apis</exclude>
                 </excludes>
               </artifactSet>
-              <relocations>
-                <relocation>
-                  <pattern>org.codehaus.plexus.util</pattern>
-                  <uberPattern>org.uber.plexus.util</uberPattern>
-                  <excludes>
-                    <exclude>org.codehaus.plexus.util.xml.Xpp3Dom</exclude>
-                    <exclude>org.codehaus.plexus.util.xml.pull.*</exclude>
-                  </excludes>
-                </relocation>
-              </relocations>
+              
               <transformers>
+                
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PackageShader">
+                  <relocations>
+                    <relocation>
+                      <pattern>org.codehaus.plexus.util</pattern>
+                      <shadedPattern>org.uber.plexus.util</shadedPattern>
+                      <excludes>
+                        <exclude>org.codehaus.plexus.util.xml.Xpp3Dom</exclude>
+                        <exclude>org.codehaus.plexus.util.xml.pull.*</exclude>
+                      </excludes>
+                    </relocation>
+                  </relocations>
+                </transformer>
+                
                 <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
+                
               </transformers>
             </configuration>
           </execution>

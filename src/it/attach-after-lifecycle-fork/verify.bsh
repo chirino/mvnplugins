@@ -3,8 +3,8 @@ import java.util.*;
 
 String[] paths =
 {
-    "org/apache/maven/its/uber/aalf/test/1.0/test-1.0-uber.jar",
-    "org/apache/maven/its/uber/aalf/test/1.0/test-1.0-sources.jar",
+    "org/fusesource/its/uberizer/aalf/test/1.0/test-1.0-shade.jar",
+    "org/fusesource/its/uberizer/aalf/test/1.0/test-1.0-sources.jar",
 };
 
 for ( String path : paths )

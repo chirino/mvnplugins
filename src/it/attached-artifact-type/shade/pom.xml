@@ -23,18 +23,18 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.fusesource.mvnplugins.its.uber.aat</groupId>
+    <groupId>org.fusesource.its.uberizer.aat</groupId>
     <artifactId>parent</artifactId>
     <version>1.0</version>
   </parent>
 
-  <artifactId>uber</artifactId>
+  <artifactId>shade</artifactId>
   <!-- NOTE: Using a type different than "jar" is the essential part of this test -->
   <packaging>ejb</packaging>
 
   <name>MSHADE-46 :: Shaded Artifact Producer</name>
   <description>
-    Test that attached uber artifacts have the same type as the original main artifact.
+    Test that attached shaded artifacts have the same type as the original main artifact.
   </description>
 
   <build>
@@ -44,14 +44,14 @@ under the License.
         <artifactId>maven-uberize-plugin</artifactId>
         <executions>
           <execution>
-            <id>attach-uber-artifact</id>
+            <id>attach-shaded-artifact</id>
             <phase>package</phase>
             <goals>
               <goal>uberize</goal>
             </goals>
             <configuration>
               <uberArtifactAttached>true</uberArtifactAttached>
-              <uberClassifierName>uber</uberClassifierName>
+              <uberClassifierName>shaded</uberClassifierName>
               <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>

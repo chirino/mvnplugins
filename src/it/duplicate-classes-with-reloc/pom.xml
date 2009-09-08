@@ -22,7 +22,7 @@ under the License.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.fusesource.mvnplugins.its.uber.dcwr</groupId>
+  <groupId>org.fusesource.its.uberizer.dcwr</groupId>
   <artifactId>test</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
@@ -33,17 +33,17 @@ under the License.
   </description>
 
   <!--
-  These dependencies contain the same class/transformer. In reality, this might happen for API JARs that have been
+  These dependencies contain the same class/resource. In reality, this might happen for API JARs that have been
   packaged by different providers and hence have different group identifiers.
   -->
   <dependencies>
     <dependency>
-      <groupId>org.fusesource.mvnplugins.its.uber.dcwr</groupId>
+      <groupId>org.fusesource.its.uberizer.dcwr</groupId>
       <artifactId>a</artifactId>
       <version>0.1</version>
     </dependency>
     <dependency>
-      <groupId>org.fusesource.mvnplugins.its.uber.dcwr</groupId>
+      <groupId>org.fusesource.its.uberizer.dcwr</groupId>
       <artifactId>b</artifactId>
       <version>0.1</version>
     </dependency>
@@ -51,7 +51,7 @@ under the License.
 
   <repositories>
     <repository>
-      <id>uber-it</id>
+      <id>shade-it</id>
       <url>file:///${basedir}/repo</url>
       <releases>
         <checksumPolicy>ignore</checksumPolicy>
@@ -85,20 +85,26 @@ under the License.
         <version>@project.version@</version>
         <executions>
           <execution>
-            <id>uber</id>
+            <id>shade</id>
             <phase>package</phase>
             <goals>
               <goal>uberize</goal>
             </goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
-              <!-- NOTE: This test checks the code path using class relocation -->
-              <relocations>
-                <relocation>
-                  <pattern>org.apache</pattern>
-                  <uberPattern>hidden</uberPattern>
-                </relocation>
-              </relocations>
+              <transformers>
+                
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PackageShader">
+                  <!-- NOTE: This test checks the code path using class relocation -->
+                  <relocations>
+                    <relocation>
+                      <pattern>org.apache</pattern>
+                      <shadedPattern>hidden</shadedPattern>
+                    </relocation>
+                  </relocations>
+                </transformer>
+                
+              </transformers>
             </configuration>
           </execution>
         </executions>

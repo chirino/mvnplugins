@@ -22,7 +22,7 @@ under the License.
 <project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.fusesource.mvnplugins.its.uber.dcwor</groupId>
+  <groupId>org.fusesource.its.uberizer.dcwr</groupId>
   <artifactId>b</artifactId>
   <version>0.1</version>
   <packaging>jar</packaging>
