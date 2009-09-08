@@ -49,6 +49,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.Uberizer;
+import org.fusesource.mvnplugins.uberize.transformer.ManifestEditor;
 import org.fusesource.mvnplugins.uberize.mojo.ArchiveFilter;
 import org.fusesource.mvnplugins.uberize.mojo.ArtifactSet;
 import org.fusesource.mvnplugins.uberize.filter.SimpleFilter;
@@ -546,12 +547,21 @@ public class UberizeMojo
 
     private List<Transformer> getTransformers()
     {
-        if ( transformers == null )
-        {
-            return Collections.EMPTY_LIST;
+        final List<Transformer> list = transformers == null? Collections.EMPTY_LIST : Arrays.asList(transformers);
+        final ArrayList<Transformer> rc = new ArrayList(list);
+        if( !containsTransformer(rc, ManifestEditor.class) ) {
+            rc.add(new ManifestEditor());
         }
+        return rc;
+    }
 
-        return Arrays.asList(transformers);
+    private boolean containsTransformer(ArrayList<Transformer> rc, Class clazz) {
+        for (Transformer transformer : rc) {
+            if( clazz.isAssignableFrom(transformer.getClass()) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List getFilters()
