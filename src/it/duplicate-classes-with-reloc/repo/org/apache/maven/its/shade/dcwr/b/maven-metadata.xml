@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><metadata>
-  <groupId>org.apache.maven.its.shade.dcwr</groupId>
+  <groupId>org.fusesource.mvnplugins.its.uber.dcwr</groupId>
   <artifactId>b</artifactId>
   <version>0.1</version>
   <versioning>

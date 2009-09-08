@@ -22,7 +22,7 @@ under the License.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.maven.its.shade.aalf</groupId>
+  <groupId>org.fusesource.mvnplugins.aalf</groupId>
   <artifactId>test</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
@@ -70,20 +70,20 @@ under the License.
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
+        <groupId>org.fusesource.mvnplugins</groupId>
+        <artifactId>maven-uberize-plugin</artifactId>
         <version>@project.version@</version>
         <executions>
           <!-- NOTE: It's the order of plugin executions that matters here, so run after lifecycle fork by Source Plugin -->
           <execution>
-            <id>attach-shade</id>
+            <id>attach-uber</id>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>uberize</goal>
             </goals>
             <configuration>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>shade</shadedClassifierName>
+              <uberArtifactAttached>true</uberArtifactAttached>
+              <uberClassifierName>uber</uberClassifierName>
               <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>

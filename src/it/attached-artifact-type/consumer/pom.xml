@@ -23,7 +23,7 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.apache.maven.its.shade.aat</groupId>
+    <groupId>org.fusesource.mvnplugins.its.uber.aat</groupId>
     <artifactId>parent</artifactId>
     <version>1.0</version>
   </parent>
@@ -33,16 +33,16 @@ under the License.
 
   <name>MSHADE-46 :: Shaded Artifact Consumer</name>
   <description>
-    Test that attached shaded artifacts have the same type as the original main artifact.
+    Test that attached uber artifacts have the same type as the original main artifact.
   </description>
 
   <dependencies>
     <dependency>
-      <groupId>org.apache.maven.its.shade.aat</groupId>
-      <artifactId>shade</artifactId>
+      <groupId>org.fusesource.mvnplugins.its.uber.aat</groupId>
+      <artifactId>uber</artifactId>
       <version>1.0</version>
       <type>ejb</type>
-      <classifier>shaded</classifier>
+      <classifier>uber</classifier>
     </dependency>
   </dependencies>
 
@@ -60,9 +60,9 @@ under the License.
             "jar" for an EJB module.
             -->
             <ejbModule>
-              <groupId>org.apache.maven.its.shade.aat</groupId>
-              <artifactId>shade</artifactId>
-              <classifier>shaded</classifier>
+              <groupId>org.fusesource.mvnplugins.its.uber.aat</groupId>
+              <artifactId>uber</artifactId>
+              <classifier>uber</classifier>
             </ejbModule>
           </modules>
         </configuration>

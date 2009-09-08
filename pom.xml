@@ -28,12 +28,13 @@ under the License.
      <version>13</version>
   </parent>
 
-  <artifactId>maven-shade-plugin</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <groupId>org.fusesource.mvnplugins</groupId>
+  <artifactId>maven-uberize-plugin</artifactId>
+  <version>1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Shade Plugin</name>
-  <description>Repackages the project classes together with their dependencies into a single uber-jar, optionally renaming classes.</description>
+  <description>Repackages the project classes together with their dependencies into a single uber-jar, optionally renaming classes and aggregating resources.</description>
 
   <prerequisites>
     <maven>${mavenVersion}</maven>
@@ -89,6 +90,12 @@ under the License.
       <version>1.5.5</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.code.google-collections</groupId>
+      <artifactId>google-collect</artifactId>
+      <version>snapshot-20080530</version>
+    </dependency>
+    
     <!-- Others -->
     <dependency>
       <groupId>asm</groupId>
@@ -121,6 +128,15 @@ under the License.
 
   <build>
     <plugins>
+      
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-maven-plugin</artifactId>

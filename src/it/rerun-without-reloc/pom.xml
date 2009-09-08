@@ -22,7 +22,7 @@ under the License.
 <project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.apache.maven.its.shade.rrwor</groupId>
+  <groupId>org.fusesource.mvnplugins.its.uber.rrwor</groupId>
   <artifactId>test</artifactId>
   <version>0.1</version>
   <packaging>jar</packaging>
@@ -30,7 +30,7 @@ under the License.
   <name>MSHADE-30</name>
   <description>
     Test that re-running the package phase without any code changes in between doesn't cause shading to crash. The
-    potential issue was that the first run produced the shaded artifact and that this artifact survived unchanged
+    potential issue was that the first run produced the uber artifact and that this artifact survived unchanged
     until shading got executed the second time, thereby re-shading all classes that were included during the first
     run.
   </description>
@@ -76,15 +76,15 @@ under the License.
         <version>2.2</version>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
+        <groupId>org.fusesource.mvnplugins</groupId>
+        <artifactId>maven-uberize-plugin</artifactId>
         <version>@project.version@</version>
         <executions>
           <execution>
-            <id>shade</id>
+            <id>uber</id>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>uberize</goal>
             </goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
