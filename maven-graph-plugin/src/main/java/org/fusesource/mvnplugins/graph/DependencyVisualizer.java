@@ -501,6 +501,16 @@ public class DependencyVisualizer {
         }
 
         public void export() {
+        	
+            String graphFont = "Serif";
+            String nodeFont = "SanSerif";
+            
+            String osName = System.getProperty("os.name", "NO OS NAME!!");
+            if (osName.contains("Windows")) {
+                graphFont = "arial";
+                nodeFont = "arial";
+            }
+        	
             p("digraph dependencies {").i(1);
             {
                 p("graph [").i(1);
@@ -511,7 +521,7 @@ public class DependencyVisualizer {
                     p("labeljust=l");
                     p("labelloc=t");
                     p("fontsize=18");
-                    p("fontname=\"Serif\"");
+                    p("fontname="+q(graphFont));
                     p("ranksep=1");
                     p("rankdir="+q(direction));
                     p("nodesep=.05");
@@ -521,14 +531,14 @@ public class DependencyVisualizer {
                 p("node [").i(1);
                 {
                     p("fontsize=8");
-                    p("fontname=\"SanSerif\"");
+                    p("fontname="+q(nodeFont));
                     p("shape=\"rectangle\"");
                 }
                 i(-1).p("];");
                 p("edge [").i(1);
                 {
                     p("fontsize=8");
-                    p("fontname=\"SanSerif\"");
+                    p("fontname="+q(nodeFont));
                 }
                 i(-1).p("];");
 
