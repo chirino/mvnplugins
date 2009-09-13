@@ -1,0 +1,52 @@
+ ------
+ Comparison with the Shade Plugin
+ ------
+ Hiram Chirino
+ ------
+ 2000-09-13
+ ------
+
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~   http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+Comparison with the Shade Plugin
+
+  The {{{./index.html}Maven Uberizer Plugin}} is originally based on the the 
+  {{{http://maven.apache.org/plugins/maven-shade-plugin}Maven Shade Plugin}}.
+  Shade plugin had a few short comings:
+  
+    * Transformations did not stack, so only one transformation could be applied to a uber jar path.
+  
+    * The class shading was done before transformation were applied.
+
+
+  With the Uberizer plugin:  
+  
+    * Transformations do stack, so you can apply multiple changes to the same jar path. jar path.
+  
+    * The class shading is done as a transformer.  This allows you to apply other transformations before
+      the shading is applied.
+
+
+  The best use case for when you need this level of configurability of the transformations is when you 
+  have multiple plexus component jars that need to be uberized and shaded.  With the shade plugin 
+  it would be impossible to accomplish.  This is because the plexus <<<META-INF/plexus/components.xml>>>
+  entries need to be merged and then based on which classes got shaded, it need to be updated again 
+  to replace the old class names with the new class names.
+  
+
+  

@@ -1,0 +1,48 @@
+ ------
+ Add Resource
+ ------
+ Hiram Chirino
+ ------
+ 2008-07-21
+ ------
+
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~   http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+Add Resource
+  
+  This transformer allows you to introduce a resource into the uber jar that was not in any
+  of the jars being merged.  The new resource gets put at the front of the list of sources for
+  the content being merged.
+  
+*----------------:--------------+
+| <<<\<path\>>>> | Required.  The jar path that the file should be placed at
+*----------*--------------:--------------+
+| <<<\<file\>>>> | Required.  The file system path to file to be used
+*----------*-----:--------------+
+Configuration Options
+
+  <Example>:  
+  
++-----
+  ...
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.AddResource"/>
+    <path>spring-beans.xml</include>
+    <file>${basedir}/src/test/resources/test-beans.xml</file>
+  </transformer>
+  ...
++----- 

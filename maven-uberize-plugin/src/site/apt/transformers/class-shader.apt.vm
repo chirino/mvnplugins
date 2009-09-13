@@ -1,0 +1,95 @@
+ ------
+ Class Shader
+ ------
+ Mauro Talevi
+ Hiram Chirino
+ ------
+ 2008-07-21
+ ------
+
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~   http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+Class Shader
+
+  If the uber jar is reused as a dependency of some other project, directly including classes from the artifact's
+  dependencies in the uber jar can cause class loading conflicts due to duplicate classes on the class path. To
+  address this issue, one can relocate the classes which get included in the uber jar in order to create a
+  private copy of their bytecode.
+
+* <<<\<relocations\>>>> 
+
+  You must configure the transformer with a list of package relocations you want it to apply.  
+  A <<<\<relocation\>>>> which is used denote a java package that should be relocated.
+  
+*-------------------------:--------------+
+| <<<\<pattern\>>>>       | Required.  The original package name.
+*----------*--------------:--------------+
+| <<<\<shadedPattern\>>>> | Required.  The new package name that classes will be relocated to.
+*----------*--------------:--------------+
+| <<<\<exclude\>>>>       | Optional.  Allows you to use ant-like patterns to <<<\<include\>>>> and <<<\<exclude\>>>> to select which classes in in the package will get relocated.
+*----------*--------------:--------------+
+
+  <Example>:
+  
++-----
+  ...
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
+    <relocations>
+      <relocation>
+        <pattern>org.codehaus.plexus.util</pattern>
+        <shadedPattern>org.uberized.plexus.util</shadedPattern>
+        <excludes>
+          <exclude>org.codehaus.plexus.util.xml.Xpp3Dom</exclude>
+          <exclude>org.codehaus.plexus.util.xml.pull.*</exclude>
+        </excludes>
+      </relocation>
+    </relocations>
+  </transformer>
+  ...            
++-----
+
+* <<<\<resources\>>>> 
+
+  On many occasions, there are resources files in the jars which make reference to the classes that you are relocating.  A good
+  example of this would be a spring bean definition file that is included in the jar.  This transformer can also search and replace
+  occurrences of the relocated class names in text based resource files.
+  
+  To enable this feature, you must configure the <<<\<resources\>>>> option to use ant-like patterns to <<<\<include\>>>> 
+  and <<<\<exclude\>>>> the resources that you want the transformation to apply to.
+  
+  <Example>:
+
++-----
+  ...
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
+    <relocations>
+      <relocation>
+        <pattern>org.project.springbeans</pattern>
+        <shadedPattern>com.company.project.springbeans</shadedPattern>
+      </relocation>
+    </relocations>
+    <resources>
+      <includes>
+        <include>*-bean.xml</include>
+      </includes>
+    </resources> 
+  </transformer>
+  ...            
++-----
+  
+  

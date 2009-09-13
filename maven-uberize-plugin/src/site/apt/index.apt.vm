@@ -1,0 +1,156 @@
+ ------
+ Introduction
+ ------
+ Hiram Chirino
+ ------
+ 2000-09-13
+ ------
+
+~~ Licensed to the Apache Software Foundation (ASF) under one
+~~ or more contributor license agreements.  See the NOTICE file
+~~ distributed with this work for additional information
+~~ regarding copyright ownership.  The ASF licenses this file
+~~ to you under the Apache License, Version 2.0 (the
+~~ "License"); you may not use this file except in compliance
+~~ with the License.  You may obtain a copy of the License at
+~~
+~~   http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~ Unless required by applicable law or agreed to in writing,
+~~ software distributed under the License is distributed on an
+~~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~ KIND, either express or implied.  See the License for the
+~~ specific language governing permissions and limitations
+~~ under the License.
+
+Maven Uberize Plugin
+
+  This plugin provides the capability to package the artifact in an uber-jar, including its dependencies and
+  to <shade> - i.e. rename - the packages of some of the dependencies.  
+  
+  This plugin is originally based on the the {{{http://maven.apache.org/plugins/maven-shade-plugin}Maven Shade Plugin}}.
+  Those familiar with it may be interested in a {{{./compared-to-shade.html}comparison 
+  with the shade plugin}}.
+
+* Usage
+
+  The {{{./shade-mojo.html}uberize:uberize}} goal should be exectued during the <<<package>>> phase. By default 
+  it will include  all the runtime dependencies of your project in the uber jar when you run '<<<mvn package>>>'.
+
+  Use the example below to add it to your project's <<<pom.xml>>>:
+
++-----
+<project>
+  ...
+  <build>
+    <plugins>
+    
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-uberizer-plugin</artifactId>
+        <version>${currentVersion}</version>
+        
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals><goal>uberize</goal></goals>
+            <configuration>
+            
+              <!-- Uncomment if you can exclude some dependencies...
+              <artifactSet>
+                <excludes>
+                  <exclude>jmock:jmock</exclude>
+                </excludes>
+              </artifactSet>
+              -->
+              
+              <!-- Uncomment if  want to move classes to new packages or aggregate and update resource files 
+              <transformers>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
+                  <relocations>
+                    <relocation>
+                      <pattern>org.apache.maven</pattern>
+                      <shadedPattern>org.fusesouce.maven</shadedPattern>
+                      <excludes>
+                        <exclude>org.codehaus.plexus.util.xml.Xpp3Dom</exclude>
+                      </excludes>
+                    </relocation>
+                  </relocations>
+                  <resources>
+                    <includes>
+                      <include>META-INF/plexus/components.xml</include>
+                    </includes>
+                  </resources>
+                </transformer>
+              </transformers>
+              -->
+              
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  ...
+</project>
++-----
+
+  The goal supports many configuration options.  For some examples, see:
+  
+    * {{{./examples/includes-excludes.html}Jar Selection and Filtering}}
+    
+    * {{{./examples/attached-artifact.html}Attached Artifacts}} 
+    
+  Also see the {{{./shade-mojo.html}uberize goal reference}} for the full listing of options.
+
+* Transformations
+
+  The uberize plugin allows you to apply a sequence of transformers when the uber jar is being created.  The 
+  transformer  results stack.  The next transformer in the configuration list will be transforming the 
+  results of the previous transformer.
+  
+  <<Standard Transformers>>
+
+  Standard transformers are use to change or move entries in the uber jar.
+
+    * {{{./transformers/class-shader.html}<<Class Shader>>}} : Uses byte code manipulation to relocate 
+    java classes to a new package  It can optionally update resource files so that class names referenced 
+    in the files are updated with the new package names.
+  
+    *  {{{./transformers/manifest-editor.html}<<Manifest Editor>>}}: Allows you to update the first jar manifest found.  
+    If none was found a new one will created.  Routinely used to make an executable jar.
+  
+  <<Aggregating Transformers>>
+
+  Since multiple jar files are being merged to create the uber jar, is common that same jar entry or path 
+  will exists in two or more of the jars being merged.  When this happens, the default behavior is to only 
+  use the content of the first jar which effectively causes you to loose the data in the subsequent jars.  
+  A warning will also be logged so that user do not get surprised.
+
+  To avoid loosing the data in those subsequent jars, this plugin allows you use an aggregation 
+  transformer.  The specific transformer you use will depend on how you want the data merged.  Since
+  transformer results stack, you should position the aggregating transformers at the top of the 
+  the configuration list so that subsequent transformers process that aggregated results.
+
+    * {{{./transformers/plexus-components.html}<<Plexus Components>>}}: Merges all the plexus components defined 
+    in the <<<META-INF/plexus/components.xml>>> files.
+  
+    * {{{./transformers/services-appender.html}<<Services Appender>>}}: Looks for files under <<<META-INF/services>>> and concatenates 
+    the contents.
+  
+    * {{{./transformers/text-aggregator.html}<<Text Aggregator>>}}: Concatenates user configured resource files.  If the text file 
+    does not end in a newline, it will introduce a newline for you so that you don't end 
+    up with last line and the first line of the next file on one line.
+    
+    * {{{./transformers/xml-appender.html}<<XML Appender>>}}: Merges multiple XML documents.  It starts with the fist XML document
+    and then merges subsequent documents by appending the children of it's root element into 
+    the the first document's root.
+
+    * {{{./transformers/add-resource.html}<<Add Resource>>}}: Allows you to introduce a resource into the uber jar that was not in any
+    of the jars being merged.  The new resource gets put at the front of the list of sources for
+    the content being merged.
+    
+    * {{{./transformers/pick-resource.html}<<Pick Resource>>}}: Picks either the first or last resource from the files being merged.
+    
+
