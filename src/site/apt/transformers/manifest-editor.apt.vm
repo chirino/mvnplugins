@@ -1,7 +1,8 @@
  ------
- Manifest Editor Transformer
+ Manifest Editor
  ------
  Mauro Talevi
+ Hiram Chirino
  ------
  2008-07-21
  ------
@@ -23,75 +24,37 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-Executable JAR
+Manifest Editor
 
-  To create an executable uber JAR, one simply needs to set the main class that serves as the application entry point:
+  Allows you to update the first jar manifest found.  If none was found a new one will created.
 
+* Making an Executable Jar
+
+  To create an executable uber jar, one simply needs to set the main class that serves as the application entry point:
+
+  <Example to set the> <<<Main-Class>>> <entry in the> <<<MANIFEST.MF>>> :
+  
 +-----
-<project>
   ...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-uberize-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ManifestEditor">
-                  <mainClass>org.sonatype.haven.HavenCli</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ManifestEditor">
+    <Main-Class>org.sonatype.haven.HavenCli</Main-Class>
+  </transformer>
   ...
-</project>
 +-----
 
-  This snippet configures a special resource transformer which sets the <<<Main-Class>>> entry in the <<<MANIFEST.MF>>>
-  of the uberized JAR. Other entries can be added to the <<<MANIFEST.MF>>> as well via key-value pairs in the
-  <<<\<manifestEntries\>>>> section:
+* Setting Other Manifest Headers
+
+  Any header of your choosing can be added in the  <<<\<manifestEntries\>>>> option.
+
+  <Example:>
 
 +-----
-<project>
   ...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-uberize-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ManifestEditor">
-                  <manifestEntries>
-                    <Main-Class>org.sonatype.haven.ExodusCli</Main-Class>
-                    <Build-Number>123</Build-Number>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ManifestEditor">
+    <manifestEntries>
+      <Main-Class>org.sonatype.haven.ExodusCli</Main-Class>
+      <Build-Number>123</Build-Number>
+    </manifestEntries>
+  </transformer>
   ...
-</project>
 +-----

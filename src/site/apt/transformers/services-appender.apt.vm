@@ -1,7 +1,8 @@
  ------
- Services Appender Transformer
+ Services Appender
  ------
  Mauro Talevi
+ Hiram Chirino
  ------
  2008-07-21
  ------
@@ -23,37 +24,18 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-* Concatenating Service Entries
+Services Appender
 
-  JAR files providing implementations of some interfaces often ship with a <<<META-INF/services/>>> directory that
-  maps interfaces to their implementation classes for lookup by the service locator. To merge multiple implementations
-  of the same interface into one service entry, the <<<ServicesAppender>>> transformer can be used:
+  Jar files providing implementations of some interfaces often ship with a <<<META-INF/services/>>> directory that
+  maps interfaces to their implementation classes for lookup by the service locator. 
+  
+  To merge all service resources, add the <<<ServicesAppender>>> transformer to your plugin configuration.  All service 
+  resources with overlapping files, will have those files concatenated.
 
+  <Example>:
+  
 +-----
-<project>
   ...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-uberize-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ServicesAppender"/>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ServicesAppender"/>
   ...
-</project>
 +-----

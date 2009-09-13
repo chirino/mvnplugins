@@ -1,5 +1,5 @@
  ------
- Pick Resource Transformer
+ Pick Resource
  ------
  Hiram Chirino
  ------
@@ -22,3 +22,28 @@
 ~~ KIND, either express or implied.  See the License for the
 ~~ specific language governing permissions and limitations
 ~~ under the License.
+
+Pick Resource
+
+  If you have overlapping resources in your uber jar, and you DON'T want to merge them, you should
+  add in this transformer.  It will at least get rid of the warning the plugin logs out when 
+  it detects overlapping resources.  The transformer also gives you a little more flexibility about
+  which overlapped resource gets picked.
+
+  You should set the <<<\<pick\>>>> option to either <<<first>>> or <<<last>>>.
+  
+  The transformer use ant-like patterns to <<<\<include\>>>> and <<<\<exclude\>>>> the 
+  resources that you want the transformation to apply to.
+
+  <Example>:  
+  
++-----
+  ...
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PickResource"/>
+    <pick>first</pick>
+    <includes>
+      <include>images/**/*.jpg</include>
+    </includes>
+  </transformer>
+  ...
++----- 

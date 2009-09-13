@@ -3,11 +3,13 @@ package org.fusesource.mvnplugins.uberize.transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
 import org.fusesource.mvnplugins.uberize.Uberizer;
+import org.fusesource.mvnplugins.uberize.Transformer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeMap;
 import java.util.ArrayList;
+import java.util.Map.Entry;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -34,73 +36,29 @@ import java.util.ArrayList;
  *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
-abstract public class AbstractPathTransformer extends AbstractTransformer
+abstract public class AbstractPathTransformer extends Resources implements Transformer
 {
-    private String path;
-    private Paths paths;
-    private boolean ignoreCase;
 
     public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
-        if( getPath() !=null && !isIgnoreCase() && getPaths() ==null ) {
-            // In the simple single path, case senstive case, we can just directly lookup
-            // the entry vs. matching against all the entries.
-            UberEntry uberEntry = uberEntries.get(getPath());
-            if( uberEntry!=null ) {
-                _process(uberizer, workDir, uberEntries, uberEntry);
+        // process all the entries that match.
+        // this can be probably optimized so we don't iterate through all the entries to find matches.
+        for (UberEntry uberEntry : new ArrayList<UberEntry>(uberEntries.values())) {
+            if( uberEntry.getSources().isEmpty() ) {
+                continue;
             }
-        } else {
-            // process all the entries that match.
-            for (UberEntry uberEntry : new ArrayList<UberEntry>(uberEntries.values())) {
-                final boolean match = matches(uberEntry.getPath());
-                if (match) {
-                    _process(uberizer, workDir, uberEntries, uberEntry);
+            final boolean match = matches(uberEntry.getPath());
+            if (match) {
+                File target = DefaultUberizer.prepareFile(workDir, uberEntry.getPath());
+                UberEntry modEntry = process(uberizer, uberEntry, target);
+                if( uberEntry !=null ) {
+                    uberEntries.put(uberEntry.getPath(), modEntry);
+                } else {
+                    uberEntries.remove(uberEntry.getPath());
                 }
             }
         }
     }
 
-    private void _process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries, UberEntry uberEntry)
-            throws IOException {
-        
-        File target = DefaultUberizer.prepareFile(workDir, uberEntry.getPath());
-        UberEntry modEntry = process(uberizer, uberEntry, target);
-        if( uberEntry!=null ) {
-            uberEntries.put(uberEntry.getPath(), modEntry);
-        } else {
-            uberEntries.remove(uberEntry.getPath());
-        }
-    }
+    abstract protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException;
 
-    protected boolean matches(String entryPath) {
-        if(isIgnoreCase()) {
-            return (getPath() != null && getPath().equalsIgnoreCase(entryPath))
-                    || (getPaths() != null && getPaths().matchesIgnoreCase(entryPath));
-        }
-        return ( getPath() !=null && getPath().equals(entryPath))
-                 || (getPaths() !=null && getPaths().matches(entryPath) );
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public Paths getPaths() {
-        return paths;
-    }
-
-    public void setPaths(Paths paths) {
-        this.paths = paths;
-    }
-
-    public boolean isIgnoreCase() {
-        return ignoreCase;
-    }
-
-    public void setIgnoreCase(boolean ignoreCase) {
-        this.ignoreCase = ignoreCase;
-    }
 }

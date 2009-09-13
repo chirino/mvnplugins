@@ -22,6 +22,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
 import java.io.IOException;
 import java.io.File;
 import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import org.fusesource.mvnplugins.uberize.Transformer;
@@ -37,11 +38,14 @@ import org.fusesource.mvnplugins.uberize.Uberizer;
 abstract public class AbstractTransformer implements Transformer
 {
     public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
-        for (Entry<String, UberEntry> entry : new TreeMap<String, UberEntry>(uberEntries).entrySet()) {
-            String entryPath = entry.getKey();
+        for (UberEntry entry : new ArrayList<UberEntry>(uberEntries.values())) {
+            if( entry.getSources().isEmpty() ) {
+                continue;
+            }
+            String entryPath = entry.getPath();
             if (matches(entryPath)) {
                 File target = DefaultUberizer.prepareFile(workDir, entryPath);
-                UberEntry modEntry = process(uberizer, entry.getValue(), target);
+                UberEntry modEntry = process(uberizer, entry, target);
                 if( modEntry!=null ) {
                     uberEntries.put(entryPath, modEntry);
                 } else {

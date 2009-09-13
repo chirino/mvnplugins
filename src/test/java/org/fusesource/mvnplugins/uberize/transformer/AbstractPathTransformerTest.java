@@ -58,24 +58,13 @@ public class AbstractPathTransformerTest extends TestCase {
         Locale.setDefault(new Locale("tr"));
     }
 
-    public void testPathCaseInsensitve() throws IOException {
-        this.transformer.setPath("abcdefghijklmnopqrstuvwxyz");
-        this.transformer.setIgnoreCase(true);
-
-        assertTrue(matches("abcdefghijklmnopqrstuvwxyz"));
-        assertTrue(matches("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-        assertFalse(matches("META-INF/MANIFEST.MF"));
-    }
-
-
     public void testPathFilterCaseInsensitve() throws IOException {
-        this.transformer.setPaths(new Paths());
-        this.transformer.getPaths().includes = new HashSet();
-        this.transformer.getPaths().includes.add("abcdefghijklmnopqrstuvwxyz");
-        this.transformer.setIgnoreCase(true);
+        this.transformer.includes = new HashSet();
+        this.transformer.includes.add("abcdefghijklmnopqrstuvwxyz");
+        this.transformer.ignoreCase = true;
 
         assertTrue(matches("abcdefghijklmnopqrstuvwxyz"));
-//  TODO: the following case is failing..        
+// TODO: not yet implemented.        
 //        assertTrue(matches("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
         assertFalse(matches("META-INF/MANIFEST.MF"));
     }
@@ -84,7 +73,7 @@ public class AbstractPathTransformerTest extends TestCase {
         transformer.matched = false;
         File work = new File("target");
         TreeMap<String, UberEntry> tree = new TreeMap<String, UberEntry>();
-        UberEntry enrty = new UberEntry(path);
+        UberEntry enrty = new UberEntry(path).addSource(work);
         tree.put(path, enrty);
         transformer.process(null, work, tree);
         return transformer.matched;

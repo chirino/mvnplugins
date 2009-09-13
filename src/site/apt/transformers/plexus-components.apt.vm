@@ -1,5 +1,5 @@
  ------
- Plexus Components Transformer
+ Plexus Components
  ------
  Mauro Talevi
  ------
@@ -23,37 +23,15 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-* Merging Plexus Component Descriptors
+Plexus Components
 
-  JARs for components targeting the Plexus IoC container contain a <<<META-INF/plexus/components.xml>>> entry that
-  declares the component and its requirements. If the uber JAR aggregates multiple Plexus components, a
-  <<<PlexusComponents>>> transformer needs to be used to merge the XML descriptors:
+  All jars for components targeting the Plexus IoC container contain a <<<META-INF/plexus/components.xml>>> entry.
+  This transformer is used to merge all the <<<META-INF/plexus/components.xml>>> component definitions.
 
+  <Example>:
+  
 +-----
-<project>
   ...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-uberize-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
   ...
-</project>
 +-----

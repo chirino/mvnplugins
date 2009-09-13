@@ -36,9 +36,8 @@ import junit.framework.TestCase;
 import org.fusesource.mvnplugins.uberize.relocation.PackageRelocation;
 import org.fusesource.mvnplugins.uberize.transformer.PlexusComponents;
 import org.fusesource.mvnplugins.uberize.transformer.ClassShader;
-import org.fusesource.mvnplugins.uberize.transformer.Paths;
+import org.fusesource.mvnplugins.uberize.transformer.Resources;
 import org.codehaus.plexus.util.*;
-import sun.tools.jar.resources.jar;
 
 /**
  * @author Jason van Zyl
@@ -129,7 +128,7 @@ public class DefaultUberizerTest extends TestCase {
             new PackageRelocation("org/component", "org/uber/component", null)
         };
 
-        shader.resources = new Paths();
+        shader.resources = new Resources();
         shader.resources.includes = new HashSet();
         shader.resources.includes.add("META-INF/plexus/components.xml");
 

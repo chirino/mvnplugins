@@ -29,8 +29,8 @@ under the License.
       <item name="Goals" href="plugin-info.html"/>
     </menu>
     <menu name="General Usage">
-      <item name="Selecting Contents for Uber JAR" href="examples/includes-excludes.html"/>
-      <item name="Attaching the Uberized Artifact" href="examples/attached-artifact.html"/>
+      <item name="Jar Selection and Filtering" href="examples/includes-excludes.html"/>
+      <item name="Attached Artifacts" href="examples/attached-artifact.html"/>
     </menu>
     <menu name="Standard Transformers">
       <item name="Class Shader" href="transformers/class-shader.html"/>

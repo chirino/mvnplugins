@@ -1,5 +1,5 @@
  ------
- Add Resource Transformer
+ Add Resource
  ------
  Hiram Chirino
  ------
@@ -22,3 +22,27 @@
 ~~ KIND, either express or implied.  See the License for the
 ~~ specific language governing permissions and limitations
 ~~ under the License.
+
+Add Resource
+  
+  This transformer allows you to introduce a resource into the uber jar that was not in any
+  of the jars being merged.  The new resource gets put at the front of the list of sources for
+  the content being merged.
+  
+*----------------:--------------+
+| <<<\<path\>>>> | Required.  The jar path that the file should be placed at
+*----------*--------------:--------------+
+| <<<\<file\>>>> | Required.  The file system path to file to be used
+*----------*-----:--------------+
+Configuration Options
+
+  <Example>:  
+  
++-----
+  ...
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.AddResource"/>
+    <path>spring-beans.xml</include>
+    <file>${basedir}/src/test/resources/test-beans.xml</file>
+  </transformer>
+  ...
++----- 

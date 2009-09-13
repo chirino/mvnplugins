@@ -1,5 +1,5 @@
  ------
- XML Appender Transformer
+ XML Appender
  ------
  Hiram Chirino
  ------
@@ -23,40 +23,27 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-* Merging Content of Specific Files
+XML Appender
 
-  Some jars contain additional resources (such as properties files) that have the same file name. To avoid overwriting, you can
-  opt to merge them by appending their content into one file. One good example for this is when aggregating both the spring-context 
-  and plexus-spring jars. Both of them have the <<<META-INF/spring.handlers>>> file which is used by Spring to handle XML schema 
-  namespaces. You can merge the contents of all the files with that specific name using the <<<AppendingTransformer>>> as shown below:
+  Merges multiple XML documents.  It starts with the fist XML document and then merges 
+  subsequent documents by appending the children of it's root element into the the first 
+  document's root.
+
+  The transformer use ant-like patterns to <<<\<include\>>>> and <<<\<exclude\>>>> the 
+  resources that you want the transformation to apply to.
+
+  <Example>:  
   
 +-----
-<project>
   ...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-uberize-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.TextAgreggator"/>
-                  <path>META-INF/spring.handlers</path>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.XmlAggregator"/>
+    <includes>
+      <include>spring-beans.xml</include>
+      <include>foo/**/*.xml</include>
+    </includes>
+    <excludes>
+      <exclude>foo/dont-touch.xml</exclude>
+    </excludes>
+  </transformer>
   ...
-</project>
 +----- 

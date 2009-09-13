@@ -30,15 +30,16 @@ import java.util.ArrayList;
  * @author David Blevins
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
-public class Paths {
+public class Resources {
 
+    public boolean ignoreCase;
     public Set includes;
     public Set excludes;
 
-    public Paths() {
+    public Resources() {
     }
 
-    public Paths(Set includes, Set excludes) {
+    public Resources(Set includes, Set excludes) {
         this.includes = includes;
         this.excludes = excludes;
     }
@@ -51,61 +52,32 @@ public class Paths {
         return excludes;
     }
 
-    public boolean matchesIgnoreCase(String value) {
-        return isIncluded(value, true) && !isExcluded(value, true);
-    }
-
     public boolean matches(String value) {
 
-        return isIncluded(value, false) && !isExcluded(value, false);
+        return isIncluded(value) && !isExcluded(value);
     }
 
-    private boolean isIncluded(String value, boolean ignoreCase) {
+    private boolean isIncluded(String value) {
         if (includes == null || includes.size() == 0) {
             return true;
         }
 
-        return matchPaths(includes, value, ignoreCase);
+        return matchPaths(includes, value);
     }
 
-    private boolean isExcluded(String value, boolean ignoreCase) {
+    private boolean isExcluded(String value) {
         if (excludes == null || excludes.size() == 0) {
             return false;
         }
 
-        return matchPaths(excludes, value, ignoreCase);
-    }
-
-    private boolean matchPaths(Collection patterns, String value, boolean ignoreCase) {
-        if( !ignoreCase ) {
-            return matchPaths(patterns, value);
-        }
-        if (matchPaths(toLower(patterns), value.toLowerCase())) return true;
-        if (matchPaths(toUpper(patterns), value.toUpperCase())) return true;
-        return false;
-    }
-
-    private ArrayList toLower(Collection patterns) {
-        ArrayList t = new ArrayList(patterns.size());
-        for (Iterator iterator = patterns.iterator(); iterator.hasNext();) {
-            String pattern = (String) iterator.next();
-            t.add(pattern.toLowerCase());
-        }
-        return t;
-    }
-    
-    private ArrayList toUpper(Collection patterns) {
-        ArrayList t = new ArrayList(patterns.size());
-        for (Iterator iterator = patterns.iterator(); iterator.hasNext();) {
-            String pattern = (String) iterator.next();
-            t.add(pattern.toUpperCase());
-        }
-        return t;
+        return matchPaths(excludes, value);
     }
 
     private boolean matchPaths(Collection p, String value) {
         for (Iterator iterator = p.iterator(); iterator.hasNext();) {
             String pattern = (String) iterator.next();
+            // TODO: inline the logic in SelectorUtils.matchPath and extend it so it supports the
+            // the ignoreCase option.
             if (SelectorUtils.matchPath(pattern, value)) {
                 return true;
             }

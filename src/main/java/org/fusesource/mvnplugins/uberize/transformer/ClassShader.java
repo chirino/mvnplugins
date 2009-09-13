@@ -57,7 +57,7 @@ import java.util.Map.Entry;
 public class ClassShader implements Transformer {
     
     public PackageRelocation[] relocations;
-    public Paths resources;
+    public Resources resources;
 
     private List<Relocator> getRelocators()
     {
@@ -91,6 +91,10 @@ public class ClassShader implements Transformer {
         HashMap<String, String> relocatedClasses = uberizer.getClassRelocations();
         RelocatorRemapper remapper = new RelocatorRemapper(relocators);
         for (UberEntry node : new ArrayList<UberEntry>(nodes.values())) {
+            if( node.getSources().isEmpty() ) {
+                continue;
+            }
+            
             String path = node.getPath();
             if ( path.endsWith( ".class" ) )
             {

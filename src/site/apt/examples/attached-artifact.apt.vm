@@ -1,7 +1,8 @@
  ------
- Uber Jar as an Attached Artifact
+ Attached Artifacts
  ------
  Mauro Talevi
+ Hiram Chirino
  ------
  2008-07-21
  ------
@@ -23,12 +24,15 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-Attaching the Uberized Artifact
+Attached Artifacts
 
   By default, the plugin will replace the project's main artifact with the uber artifact. If both the original and
   the uberized artifact should be installed/deployed to the repository, one can configure the plugin to attach the
-  uber artifact as a secondary artifact:
+  uber artifact as a secondary artifact.  The uberized artifact is distinguished from the main artifact by means 
+  of the additional classifier.  The classifier defaults to 'uber'.
 
+  <Example>:
+  
 +-----
 <project>
   ...
@@ -41,9 +45,7 @@ Attaching the Uberized Artifact
         <executions>
           <execution>
             <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
+            <goals><goal>uberize</goal></goals>
             <configuration>
               <uberArtifactAttached>true</uberArtifactAttached>
               <uberClassifierName>jackofall</uberClassifierName> <!-- Any name that makes sense -->
@@ -57,5 +59,4 @@ Attaching the Uberized Artifact
 </project>
 +-----
 
-  The uberized artifact is distinguished from the main artifact by means of the additional classifier.  The classifier defaults to
-  'uber'.
+  

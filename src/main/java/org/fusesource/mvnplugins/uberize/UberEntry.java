@@ -93,17 +93,6 @@ public class UberEntry {
     }
 
     /**
-     *
-     * @return the source file associated with entry if there is only one, otherwise returns null.
-     */
-    public File getSource() {
-        if( sources.size()!=1 ) {
-            return null;
-        }
-        return sources.get(0);
-    }
-
-    /**
      * The path of the entry.
      *
      * @return

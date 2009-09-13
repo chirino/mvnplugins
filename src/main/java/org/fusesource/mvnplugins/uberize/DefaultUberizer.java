@@ -113,7 +113,12 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
         // Cleanup any remaining overlapping entries. First source wins.
         boolean ok = true;
         for (UberEntry entry : new ArrayList<UberEntry>(tree.values())) {
-            pickOneSource(tree, entry);
+            if( entry.getSources().isEmpty() ) {
+                // We can dump empty entries..
+                tree.remove(entry.getPath());
+            } else {
+                pickOneSource(tree, entry);
+            }
         }
 
         // Generate the uber jar using the transformed tree
@@ -135,7 +140,7 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
 
                 // Write the jar enry from the node's file
                 jos.putNextEntry(new JarEntry(path));
-                File file = entry.getValue().getSource();
+                File file = entry.getValue().getSources().get(0);
                 FileInputStream is = new FileInputStream(file);
                 try {
                     IOUtil.copy(is, jos);
@@ -151,6 +156,9 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
     }
 
     public File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry) {
+        if( entry.getSources().isEmpty() ) {
+            return null;
+        }
         if (entry.getSources().size() > 1) {
             warn("  Overlapping sources for jar entry: " + entry.getPath());
             int counter = 0;
@@ -168,7 +176,7 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
                 counter++;
             }
         }
-        return entry.getSource();
+        return entry.getSources().get(0);
     }
 
     public HashMap<String, String>  getClassRelocations() {

@@ -1,7 +1,8 @@
  ------
- Selecting Contents for Uber JAR
+ Jar Selection and Filtering
  ------
  Mauro Talevi
+ Hiram Chirino
  ------
  2008-07-21
  ------
@@ -23,9 +24,19 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-Selecting Contents for the Uber JAR
+Jar Selection and Filtering
 
-  The POM snippet below shows how to control which project dependencies should be included/excluded in the uber JAR:
+* <<<\<artifactSet\>>>>
+
+  The <<<\<artifactSet\>>>> option can be used to select which artifact dependencies should be 
+  included/excluded in the uber jar.  
+  
+  <<<\<includes\>>>> are used to specify a white list of artifacts and <<<\<excludes\>>>> are used 
+  to remove artifacts that are being included.. 
+  
+  Artifacts are denoted by a composite identifier of the form <groupId>:<artifactId>[:<classifier>].
+
+  <Example>:
 
 +-----
 <project>
@@ -61,10 +72,15 @@ Selecting Contents for the Uber JAR
 </project>
 +-----
 
-  Of course, <<<\<includes\>>>> can be used as well to specify a white list of artifacts. Artifacts are denoted by a
-  composite idenitifer of the form <groupId>:<artifactId>[:<classifier>].
+* <<<\<filters\>>>>
 
-  For fine-grained control of which classes from the selected dependencies are included, artifact filters can be used:
+  Additionally, The <<<\<filters\>>>> option can be used for fine-grained control of the classes 
+  and resources that are included int the uber jar.
+  
+  Ant-like patterns in the <<<\<include\>>>> and <<<\<exclude\>>>> are used to specify which 
+  classes and resources should be included in the uber jar.
+
+  <Example>:
 
 +-----
 <project>
@@ -105,5 +121,4 @@ Selecting Contents for the Uber JAR
 </project>
 +-----
 
-  Here, Ant-like patterns are used to specify that from the dependency <<<junit:junit>>> only certain classes/resources
-  should be included in the uber JAR.
+ 

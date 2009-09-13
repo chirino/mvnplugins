@@ -23,10 +23,26 @@ import java.io.IOException;
 import java.util.TreeMap;
 
 /**
+ * Transformer implementations are used to tranform the content and structure
+ * of an uber jar before it is finalized.
+ *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public interface Transformer {
 
+    /**
+     * A transformer will modify the specified uber entries to apply transformation.  It can
+     * add/remove entries from the map or replace existing uber entries.
+     *
+     * A transformer should not modify exisiting uber entries.  It should instead create new
+     * enry instance (linked to the old one) and replace the old entry in the map with the
+     * new entry.
+     *
+     * @param uberizer the Uberizer instance requesting the transformation.
+     * @param workDir a work directory that the transformer can store transformed files in
+     * @param uberEntries a map of all the jar entries that will be included in the uber jar
+     * @throws IOException
+     */
     public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException;
 
 }

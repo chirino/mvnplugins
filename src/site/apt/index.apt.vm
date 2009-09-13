@@ -3,7 +3,7 @@
  ------
  Hiram Chirino
  ------
- 2008-07-21
+ 2000-09-13
  ------
 
 ~~ Licensed to the Apache Software Foundation (ASF) under one
@@ -26,30 +26,69 @@
 Maven Uberize Plugin
 
   This plugin provides the capability to package the artifact in an uber-jar, including its dependencies and
-  to <shade> - i.e. rename - the packages of some of the dependencies.  It is originally based on the the 
-  {{{http://maven.apache.org/plugins/maven-shade-plugin}Maven Shade Plugin}}.
+  to <shade> - i.e. rename - the packages of some of the dependencies.  
+  
+  This plugin is originally based on the the {{{http://maven.apache.org/plugins/maven-shade-plugin}Maven Shade Plugin}}.
+  Those familiar with it may be interested in a {{{./compared-to-shade.html}comparison 
+  with the shade plugin}}.
 
 * Usage
 
-  Add it to your project in the plugins section of the POM:
+  The {{{./shade-mojo.html}uberize:uberize}} goal should be exectued during the <<<package>>> phase. By default 
+  it will include  all the runtime dependencies of your project in the uber jar when you run '<<<mvn package>>>'.
+
+  Use the example below to add it to your project's <<<pom.xml>>>:
 
 +-----
 <project>
   ...
   <build>
     <plugins>
+    
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-uberizer-plugin</artifactId>
         <version>${currentVersion}</version>
-        <configuration>
-          ...
-          <transformers>
-            <transformer ... />
-            <transformer ... />
-          </transformers>
-          ...
-        </configuration>
+        
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals><goal>uberize</goal></goals>
+            <configuration>
+            
+              <!-- Uncomment if you can exclude some dependencies...
+              <artifactSet>
+                <excludes>
+                  <exclude>jmock:jmock</exclude>
+                </excludes>
+              </artifactSet>
+              -->
+              
+              <!-- Uncomment if  want to move classes to new packages or aggregate and update resource files 
+              <transformers>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
+                  <relocations>
+                    <relocation>
+                      <pattern>org.apache.maven</pattern>
+                      <shadedPattern>org.fusesouce.maven</shadedPattern>
+                      <excludes>
+                        <exclude>org.codehaus.plexus.util.xml.Xpp3Dom</exclude>
+                      </excludes>
+                    </relocation>
+                  </relocations>
+                  <resources>
+                    <includes>
+                      <include>META-INF/plexus/components.xml</include>
+                    </includes>
+                  </resources>
+                </transformer>
+              </transformers>
+              -->
+              
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -57,16 +96,13 @@ Maven Uberize Plugin
 </project>
 +-----
 
-  The {{{./shade-mojo.html}uberize:uberize}} goal executes during the <<<package>>> phase. By default It will include 
-  all the runtime dependencies of your project in the uber jar.
-
-  The goal supports many configuration options.  You can:
+  The goal supports many configuration options.  For some examples, see:
   
-    * {{{./examples/includes-excludes.html}Select/Filter the JAR Contents}}
+    * {{{./examples/includes-excludes.html}Jar Selection and Filtering}}
     
-    * {{{./examples/attached-artifact.html}Uber Jar as an Attached Artifact}} 
+    * {{{./examples/attached-artifact.html}Attached Artifacts}} 
     
-  See the {{{./shade-mojo.html}uberize goal reference}} for the full listing of options.
+  Also see the {{{./shade-mojo.html}uberize goal reference}} for the full listing of options.
 
 * Transformations
 
@@ -83,7 +119,7 @@ Maven Uberize Plugin
     in the files are updated with the new package names.
   
     *  {{{./transformers/manifest-editor.html}<<Manifest Editor>>}}: Allows you to update the first jar manifest found.  
-    If none was found a new one will created.  Routinely used to make an executable JAR.
+    If none was found a new one will created.  Routinely used to make an executable jar.
   
   <<Aggregating Transformers>>
 

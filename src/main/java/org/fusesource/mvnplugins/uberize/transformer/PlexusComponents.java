@@ -52,7 +52,7 @@ public class PlexusComponents
 
         // This transformer only needs to kick in when there is
         // more than 1 components.xml file that needs to get aggregated.
-        if (uberEntry == null || uberEntry.getSources().size() == 1) {
+        if (uberEntry == null || uberEntry.getSources().size() <= 1) {
             return;
         }
 

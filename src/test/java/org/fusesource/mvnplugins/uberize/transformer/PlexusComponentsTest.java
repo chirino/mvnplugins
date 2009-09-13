@@ -58,7 +58,7 @@ public class PlexusComponentsTest
         entries.put(path, uberEntry);
         transformerPlexus.process(null, basedir, entries);
         assertEquals( IOUtil.toString( getClass().getResourceAsStream( "/components-expected.xml" ) ),
-                      FileUtils.fileRead( entries.get(path).getSource()) );
+                      FileUtils.fileRead( entries.get(path).getSources().get(0)) );
     }
 
     private File resourceToFile(String resource) throws IOException {
