@@ -25,17 +25,18 @@ import java.util.TreeMap;
 
 import org.fusesource.mvnplugins.uberize.UberEntry;
 import org.fusesource.mvnplugins.uberize.Transformer;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
  * A resource processor that allows the addition of an arbitrary file
  * content into the uber JAR.
  */
-public class Include implements Transformer {
+public class AddResource implements Transformer {
 
     String path;
     File file;
 
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
         if( file!=null && file.exists() && path!=null ) {
             final UberEntry uberEntry = uberEntries.get(path);
             UberEntry modEntry = new UberEntry(path, uberEntry);

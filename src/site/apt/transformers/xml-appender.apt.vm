@@ -1,7 +1,7 @@
  ------
- Uber Jar as an Attached Artifact
+ XML Appender Transformer
  ------
- Mauro Talevi
+ Hiram Chirino
  ------
  2008-07-21
  ------
@@ -23,12 +23,13 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-Attaching the Uberized Artifact
+* Merging Content of Specific Files
 
-  By default, the plugin will replace the project's main artifact with the uber artifact. If both the original and
-  the uberized artifact should be installed/deployed to the repository, one can configure the plugin to attach the
-  uber artifact as a secondary artifact:
-
+  Some jars contain additional resources (such as properties files) that have the same file name. To avoid overwriting, you can
+  opt to merge them by appending their content into one file. One good example for this is when aggregating both the spring-context 
+  and plexus-spring jars. Both of them have the <<<META-INF/spring.handlers>>> file which is used by Spring to handle XML schema 
+  namespaces. You can merge the contents of all the files with that specific name using the <<<AppendingTransformer>>> as shown below:
+  
 +-----
 <project>
   ...
@@ -45,8 +46,11 @@ Attaching the Uberized Artifact
               <goal>uberize</goal>
             </goals>
             <configuration>
-              <uberArtifactAttached>true</uberArtifactAttached>
-              <uberClassifierName>jackofall</uberClassifierName> <!-- Any name that makes sense -->
+              <transformers>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.TextAgreggator"/>
+                  <path>META-INF/spring.handlers</path>
+                </transformer>
+              </transformers>
             </configuration>
           </execution>
         </executions>
@@ -55,7 +59,4 @@ Attaching the Uberized Artifact
   </build>
   ...
 </project>
-+-----
-
-  The uberized artifact is distinguished from the main artifact by means of the additional classifier.  The classifier defaults to
-  'uber'.
++----- 

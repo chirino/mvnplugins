@@ -1,5 +1,5 @@
  ------
- Selecting Contents for Uber JAR
+ Manifest Editor Transformer
  ------
  Mauro Talevi
  ------
@@ -23,48 +23,9 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-Selecting Contents for the Uber JAR
+Executable JAR
 
-  The POM snippet below shows how to control which project dependencies should be included/excluded in the uber JAR:
-
-+-----
-<project>
-  ...
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-uberize-plugin</artifactId>
-        <version>${project.version}</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>uberize</goal>
-            </goals>
-            <configuration>
-              <artifactSet>
-                <excludes>
-                  <exclude>classworlds:classworlds</exclude>
-                  <exclude>junit:junit</exclude>
-                  <exclude>jmock:jmock</exclude>
-                  <exclude>xml-apis:xml-apis</exclude>
-                </excludes>
-              </artifactSet>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-  ...
-</project>
-+-----
-
-  Of course, <<<\<includes\>>>> can be used as well to specify a white list of artifacts. Artifacts are denoted by a
-  composite idenitifer of the form <groupId>:<artifactId>[:<classifier>].
-
-  For fine-grained control of which classes from the selected dependencies are included, artifact filters can be used:
+  To create an executable uber JAR, one simply needs to set the main class that serves as the application entry point:
 
 +-----
 <project>
@@ -82,19 +43,11 @@ Selecting Contents for the Uber JAR
               <goal>uberize</goal>
             </goals>
             <configuration>
-              <filters>
-                <filter>
-                  <artifact>junit:junit</artifact>
-                  <includes>
-                    <include>junit/framework/**</include>
-                    <include>org/junit/**</include>
-                  </includes>
-                  <excludes>
-                    <exclude>org/junit/experimental/**</exclude>
-                    <exclude>org/junit/runners/**</exclude>
-                  </excludes>
-                </filter>
-              </filters>
+              <transformers>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ManifestEditor">
+                  <mainClass>org.sonatype.haven.HavenCli</mainClass>
+                </transformer>
+              </transformers>
             </configuration>
           </execution>
         </executions>
@@ -105,5 +58,40 @@ Selecting Contents for the Uber JAR
 </project>
 +-----
 
-  Here, Ant-like patterns are used to specify that from the dependency <<<junit:junit>>> only certain classes/resources
-  should be included in the uber JAR.
+  This snippet configures a special resource transformer which sets the <<<Main-Class>>> entry in the <<<MANIFEST.MF>>>
+  of the uberized JAR. Other entries can be added to the <<<MANIFEST.MF>>> as well via key-value pairs in the
+  <<<\<manifestEntries\>>>> section:
+
++-----
+<project>
+  ...
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-uberize-plugin</artifactId>
+        <version>${project.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>uberize</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ManifestEditor">
+                  <manifestEntries>
+                    <Main-Class>org.sonatype.haven.ExodusCli</Main-Class>
+                    <Build-Number>123</Build-Number>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  ...
+</project>
++-----

@@ -24,7 +24,9 @@ import org.fusesource.mvnplugins.uberize.relocation.PackageRelocation;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 import org.codehaus.plexus.util.IOUtil;
+import org.codehaus.plexus.util.FileUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -38,22 +40,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+import java.util.Map.Entry;
 
 /**
  * @author Jason van Zyl
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
-public class PackageShader implements Transformer {
+public class ClassShader implements Transformer {
     
     public PackageRelocation[] relocations;
+    public Paths resources;
 
     private List<Relocator> getRelocators()
     {
         List<Relocator> relocators = new ArrayList<Relocator>();
-
         if ( relocations == null )
         {
             return relocators;
@@ -70,7 +74,7 @@ public class PackageShader implements Transformer {
     }
 
 
-    public void process(File workDir, TreeMap<String, UberEntry> nodes) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> nodes) throws IOException {
 
         final List<Relocator> relocators = getRelocators();
 
@@ -79,23 +83,20 @@ public class PackageShader implements Transformer {
             return;
         }
 
+
+        HashMap<String, String> relocatedClasses = new HashMap<String, String>();
         RelocatorRemapper remapper = new RelocatorRemapper(relocators);
-        for (Entry<String, UberEntry> entry : new TreeMap<String, UberEntry>(nodes).entrySet()) {
-            String path = entry.getKey();
-            UberEntry node = entry.getValue();
+        for (UberEntry node : new ArrayList<UberEntry>(nodes.values())) {
+            String path = node.getPath();
             if ( path.endsWith( ".class" ) )
             {
 
-                if( node.getSource()==null ) {
-                    // we depend on not getting duplicate class files.
-                    continue;
-                }
-
                 // Need to take the .class off for remapping evaluation
-                String remappedPath = remapper.map( path.substring( 0, path.indexOf( '.' ) ) ) + ".class";
+                final String classPath = path.substring(0, path.indexOf('.'));
+                String remappedPath = remapper.map(classPath) + ".class";
                 byte[] modifiedClass;
 
-                File file = node.getSource();
+                File file = uberizer.pickOneSource(nodes, node);
                 InputStream is = new FileInputStream( file );
                 try {
                     ClassReader cr = new ClassReader( is );
@@ -108,19 +109,58 @@ public class PackageShader implements Transformer {
                 }
 
 
+                String className = classPath.replace('/','.');
+                String mappedClassName = mapClassName(relocators, className);
+                if( mappedClassName == className ) {
+                    relocatedClasses.put(className, mappedClassName);
+                }
+
                 // Write the file out
                 is = new ByteArrayInputStream(modifiedClass);
                 File classFile = DefaultUberizer.writeFile(workDir, remappedPath, is);
 
                 // Modify the node tree.
                 nodes.remove(path);
-                UberEntry relocatedNode = new UberEntry(remappedPath, node);
-                relocatedNode.getSources().add(classFile);
-                nodes.put(remappedPath, relocatedNode);
+                UberEntry update = new UberEntry(remappedPath, node).addSource(classFile);
+                nodes.put(update.getPath(), update);
+            }
+        }
+
+        // Should we update resources with the class name changes?
+        if( resources!=null && !relocatedClasses.isEmpty()) {
+            for (UberEntry node : new ArrayList<UberEntry>(nodes.values())) {
+                String path = node.getPath();
+                if ( resources.matches(path) && !path.endsWith(".class")) {
+                    File file = uberizer.pickOneSource(nodes, node);
+                    String content = FileUtils.fileRead(file);
+                    for (Entry<String, String> entry : relocatedClasses.entrySet()) {
+                        content.replaceAll(Pattern.quote(entry.getKey()), Pattern.quote(entry.getValue()));
+                    }
+                    File udpateFile = DefaultUberizer.prepareFile(workDir, node.getPath());
+                    FileUtils.fileWrite(udpateFile.getPath(), content);
+
+                    // Modify the node tree.
+                    UberEntry update = new UberEntry(node).addSource(udpateFile);
+                    nodes.put(node.getPath(), update);
+                }
             }
         }
     }
 
+    public String mapClassName(List<Relocator> relocators, String name)
+    {
+        String value = name;
+        for ( Iterator i = relocators.iterator(); i.hasNext(); )
+        {
+            Relocator r = (Relocator) i.next();
+            if ( r.canRelocateClass( name ) )
+            {
+                value = r.relocateClass( name );
+                break;
+            }
+        }
+        return value;
+    }
 
     class RelocatorRemapper extends Remapper
     {

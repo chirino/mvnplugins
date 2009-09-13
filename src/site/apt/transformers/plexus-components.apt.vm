@@ -1,5 +1,5 @@
  ------
- Uber Jar as an Attached Artifact
+ Plexus Components Transformer
  ------
  Mauro Talevi
  ------
@@ -23,11 +23,11 @@
 ~~ specific language governing permissions and limitations
 ~~ under the License.
 
-Attaching the Uberized Artifact
+* Merging Plexus Component Descriptors
 
-  By default, the plugin will replace the project's main artifact with the uber artifact. If both the original and
-  the uberized artifact should be installed/deployed to the repository, one can configure the plugin to attach the
-  uber artifact as a secondary artifact:
+  JARs for components targeting the Plexus IoC container contain a <<<META-INF/plexus/components.xml>>> entry that
+  declares the component and its requirements. If the uber JAR aggregates multiple Plexus components, a
+  <<<PlexusComponents>>> transformer needs to be used to merge the XML descriptors:
 
 +-----
 <project>
@@ -45,8 +45,9 @@ Attaching the Uberized Artifact
               <goal>uberize</goal>
             </goals>
             <configuration>
-              <uberArtifactAttached>true</uberArtifactAttached>
-              <uberClassifierName>jackofall</uberClassifierName> <!-- Any name that makes sense -->
+              <transformers>
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
+              </transformers>
             </configuration>
           </execution>
         </executions>
@@ -56,6 +57,3 @@ Attaching the Uberized Artifact
   ...
 </project>
 +-----
-
-  The uberized artifact is distinguished from the main artifact by means of the additional classifier.  The classifier defaults to
-  'uber'.

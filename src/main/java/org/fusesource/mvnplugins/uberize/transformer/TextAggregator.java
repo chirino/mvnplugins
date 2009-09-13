@@ -30,16 +30,19 @@ import java.io.BufferedOutputStream;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
  * A resource processor that appends content for a resource, separated by
  * an end of line sequence.
+ * 
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
-public class TextAgreggator extends AbstractPathTransformer
+public class TextAggregator extends AbstractPathTransformer
 {
     public String eol = "\n";
 
-    protected void process(UberEntry entry, File target) throws IOException {
+    protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException {
         byte eolBytes[] = eol.getBytes("UTF-8");
         OutputStream out = new BufferedOutputStream(new FileOutputStream(target));
         int counter=0;
@@ -71,6 +74,7 @@ public class TextAgreggator extends AbstractPathTransformer
         } finally {
             IOUtil.close(out);
         }
+        return new UberEntry(entry).addSource(target);        
     }
 
 }
