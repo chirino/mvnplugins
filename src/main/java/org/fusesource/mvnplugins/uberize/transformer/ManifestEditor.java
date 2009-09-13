@@ -21,6 +21,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 import org.codehaus.plexus.util.IOUtil;
 
 import java.io.File;
@@ -34,12 +35,11 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
- * A resource processor that allows the arbitrary addition of attributes to
- * the first MANIFEST.MF that is found in the set of JARs being processed, or
- * to a newly created manifest for the uber JAR.
+ * Allows you to change the first MANIFEST.MF that is found in the 
+ * set of JARs being processed.
  *
  * @author Jason van Zyl
- * @author Hiram Chirino
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  * @since 1.2
  */
 public class ManifestEditor implements Transformer {
@@ -49,7 +49,7 @@ public class ManifestEditor implements Transformer {
     private String mainClass;
     private Map manifestEntries;
 
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
 
         Manifest manifest;
         final UberEntry uberEntry = uberEntries.get(MANIFEST_PATH);

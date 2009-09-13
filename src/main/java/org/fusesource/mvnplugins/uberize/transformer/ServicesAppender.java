@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
  * Resources transformer that appends entries in META-INF/services resources into
@@ -48,7 +49,7 @@ public class ServicesAppender extends AbstractTransformer {
         return resource.startsWith(SERVICES_PATH);
     }
 
-    protected void process(UberEntry entry, File target) throws IOException {
+    protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException {
         OutputStream out = new FileOutputStream(target);
         try {
             for (File source : entry.getSources()) {
@@ -62,6 +63,7 @@ public class ServicesAppender extends AbstractTransformer {
         } finally {
             IOUtil.close(out);
         }
+        return new UberEntry(entry).addSource(target);
     }
 
 }

@@ -33,8 +33,8 @@ under the License.
   <version>1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
-  <name>Maven Shade Plugin</name>
-  <description>Repackages the project classes together with their dependencies into a single uber-jar, optionally renaming classes and aggregating resources.</description>
+  <name>Maven Uberize Plugin</name>
+  <description>Repackages the project classes together with their dependencies into a single uber-jar, optionally applying transofrmations like class renaming and resources aggregation.</description>
 
   <prerequisites>
     <maven>${mavenVersion}</maven>

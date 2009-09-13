@@ -20,6 +20,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
  */
 
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 import org.codehaus.plexus.util.IOUtil;
 import org.jdom.Attribute;
 import org.jdom.Content;
@@ -38,10 +39,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 
+/**
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
+ */
 public class XmlAppender extends AbstractPathTransformer {
     public static final String XSI_NS = "http://www.w3.org/2001/XMLSchema-instance";
 
-    protected void process(UberEntry entry, File target) throws IOException {
+    protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException {
         Document doc=null;
         OutputStream out = new FileOutputStream(target);
         try {
@@ -52,6 +56,7 @@ public class XmlAppender extends AbstractPathTransformer {
         } finally {
             IOUtil.close(out);
         }
+        return new UberEntry(entry).addSource(target);
     }
 
     private Document merge(Document doc, File source) throws IOException {

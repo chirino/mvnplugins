@@ -38,21 +38,19 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.HashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 /**
  * @author Jason van Zyl
- * @author Hiram Chirino
- *
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  * @plexus.component
  */
-public class DefaultUberizer
-        extends AbstractLogEnabled
-        implements Uberizer {
-
-
+public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
+    private final HashMap<String, String> classRelocations = new HashMap<String, String>();
+    
     public void uberize(File targetDir, Set sourceJars, File uberJar, List<Filter> filters, List<Transformer> transformers)
             throws IOException {
         targetDir = targetDir.getCanonicalFile();
@@ -73,11 +71,11 @@ public class DefaultUberizer
             int counter = 1;
             String id = jar.getName();
             File workDir = new File(targetDir, id);
-            while( workDir.exists() ) {
-                id = jar.getName()+"."+counter++;
+            while (workDir.exists()) {
+                id = jar.getName() + "." + counter++;
                 workDir = new File(targetDir, id);
             }
-            FileUtils.fileAppend(jarMappingTxt, id + "=" +jar.getPath()+"\n");
+            FileUtils.fileAppend(jarMappingTxt, id + "=" + jar.getPath() + "\n");
 
             List jarFilters = getFilters(jar, filters);
             JarFile jarFile = new JarFile(jar);
@@ -108,29 +106,14 @@ public class DefaultUberizer
         for (Transformer transformer : transformers) {
             final String id = "process-" + (transformerCounter++);
             File xformWorkDir = new File(targetDir, id);
-            FileUtils.fileAppend(transformMappingTxt, id + "=" + transformer+"\n");
-            transformer.process(xformWorkDir, tree);
+            FileUtils.fileAppend(transformMappingTxt, id + "=" + transformer + "\n");
+            transformer.process(this, xformWorkDir, tree);
         }
 
         // Cleanup any remaining overlapping entries. First source wins.
         boolean ok = true;
-        for (UberEntry entry : new ArrayList<UberEntry>(tree.values()) ) {
-            if( entry.getSources().size() > 1 ) {
-                warn("  Overlapping sources for jar entry: " + entry.getPath());
-                int counter=0;
-                for (File file : entry.getSources()) {
-                    if( counter!=0 ) {
-                        warn("    Ignoring source: "+file);
-                    } else {
-                        warn("    Using source: "+file);
-                        UberEntry update = new UberEntry(entry);
-                        update.getSources().add(file);
-                        tree.put(entry.getPath(), update);
-                    }
-                    counter++;
-                }
-                ok = false;
-            }
+        for (UberEntry entry : new ArrayList<UberEntry>(tree.values())) {
+            pickOneSource(tree, entry);
         }
 
         // Generate the uber jar using the transformed tree
@@ -167,22 +150,48 @@ public class DefaultUberizer
 
     }
 
+    public File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry) {
+        if (entry.getSources().size() > 1) {
+            warn("  Overlapping sources for jar entry: " + entry.getPath());
+            int counter = 0;
+            final List<File> files = entry.getSources();
+            for (File file : files) {
+                if (counter != 0) {
+                    warn("    Ignoring source: " + file);
+                } else {
+                    warn("    Using source: " + file);
+                    UberEntry update = new UberEntry(entry);
+                    update.getSources().add(file);
+                    tree.put(entry.getPath(), update);
+                    entry = update;
+                }
+                counter++;
+            }
+        }
+        return entry.getSource();
+    }
+
+    public HashMap<String, String>  getClassRelocations() {
+        return this.classRelocations;
+    }
+
+
     private void warn(String message) {
         final Logger logger = getLogger();
-        if( logger!=null ) {
+        if (logger != null) {
             logger.warn(message);
         } else {
-            System.out.println("[WARN] "+message);
+            System.out.println("[WARN] " + message);
         }
     }
 
     static void getParentDirs(String path, ArrayList<String> dirs) {
-        if( path.length() < 2 ) {
+        if (path.length() < 2) {
             return;
         }
         int p = path.lastIndexOf("/", path.length() - 2);
         if (p > 0) {
-            String dir = path.substring(0, p+1);
+            String dir = path.substring(0, p + 1);
             dirs.add(dir);
             getParentDirs(dir, dirs);
         }

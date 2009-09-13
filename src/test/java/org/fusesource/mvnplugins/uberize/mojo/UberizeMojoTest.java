@@ -33,7 +33,7 @@ import java.util.Set;
 import org.fusesource.mvnplugins.uberize.Uberizer;
 import org.fusesource.mvnplugins.uberize.relocation.PackageRelocation;
 import org.fusesource.mvnplugins.uberize.transformer.PlexusComponents;
-import org.fusesource.mvnplugins.uberize.transformer.PackageShader;
+import org.fusesource.mvnplugins.uberize.transformer.ClassShader;
 import org.codehaus.plexus.PlexusTestCase;
 
 /**
@@ -68,7 +68,7 @@ public class UberizeMojoTest
 
         List relocators = new ArrayList();
 
-        PackageShader shader = new PackageShader();
+        ClassShader shader = new ClassShader();
         shader.relocations = new PackageRelocation[] {
             new PackageRelocation("org.codehaus.plexus.util", "hidden", Arrays.asList( new String[] {
             "org.codehaus.plexus.util.xml.Xpp3Dom", "org.codehaus.plexus.util.xml.pull.*" } ))
@@ -104,7 +104,7 @@ public class UberizeMojoTest
 
         List relocators = new ArrayList();
 
-        PackageShader shader = new PackageShader();
+        ClassShader shader = new ClassShader();
         shader.relocations = new PackageRelocation[] {
             new PackageRelocation("org/codehaus/plexus/util", shadedPattern, Arrays.asList(
             new String[]{"org/codehaus/plexus/util/xml/Xpp3Dom", "org/codehaus/plexus/util/xml/pull.*"}))

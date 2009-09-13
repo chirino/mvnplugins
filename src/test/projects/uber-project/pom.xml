@@ -57,7 +57,9 @@
               
               <transformers>
                 
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PackageShader">
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
+
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
                   <relocations>
                     <relocation>
                       <pattern>org.codehaus.plexus.util</pattern>
@@ -67,10 +69,18 @@
                         <exclude>org.codehaus.plexus.util.xml.pull.*</exclude>
                       </excludes>
                     </relocation>
+                    <relocation>
+                      <pattern>org.component</pattern>
+                      <shadedPattern>org.uber.component</shadedPattern>
+                    </relocation>
                   </relocations>
+                  <!-- Lets have the transformer also update the classes found in the following -->
+                  <resources>
+                    <includes>
+                      <include>META-INF/plexus/components.xml</include>
+                    </includes>
+                  </resources>
                 </transformer>
-                
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PlexusComponents"/>
                 
               </transformers>
             </configuration>

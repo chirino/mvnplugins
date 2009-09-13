@@ -22,30 +22,35 @@ package org.fusesource.mvnplugins.uberize.transformer;
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeMap;
+import java.util.List;
 
 import org.fusesource.mvnplugins.uberize.UberEntry;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
- * A resource processor that allows the addition of an arbitrary file
- * content into the uber JAR.
+ * A transformer that picks either the first or last resource
+ * from all the available files.
  *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
-public class PickResource implements Transformer {
+public class PickResource extends AbstractPathTransformer {
 
-    String path;
-    File file;
+    public String type="first";
 
-    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
-        if( file!=null && file.exists() && path!=null ) {
-            final UberEntry uberEntry = uberEntries.get(path);
-            UberEntry modEntry = new UberEntry(path, uberEntry);
-            modEntry.getSources().add(file);
-            modEntry.getSources().addAll(uberEntry.getSources());
-            uberEntries.put(path, modEntry);
+    protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException {
+        final List<File> sources = entry.getSources();
+        if( sources.isEmpty() ) {
+            return entry;
+        }
+        if( "first".equals(type) ) {
+            return new UberEntry(entry).addSource(sources.get(0));
+        } else if( "last".equals(type) ) {
+            return new UberEntry(entry).addSource(sources.get(sources.size()-1));
+        } else {
+            throw new IllegalArgumentException("Invalid configuration. Type must be set to 'first' or 'last'");
         }
     }
+
 
 }

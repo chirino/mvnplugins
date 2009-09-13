@@ -27,21 +27,22 @@ import java.util.Map.Entry;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
  * Handy base class for simple transformers.
+ * 
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 abstract public class AbstractTransformer implements Transformer
 {
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
         for (Entry<String, UberEntry> entry : new TreeMap<String, UberEntry>(uberEntries).entrySet()) {
             String entryPath = entry.getKey();
             if (matches(entryPath)) {
                 File target = DefaultUberizer.prepareFile(workDir, entryPath);
-                process(entry.getValue(), target);
-                if( target.exists() ) {
-                    final UberEntry modEntry = new UberEntry(entry.getValue());
-                    modEntry.getSources().add(target);
+                UberEntry modEntry = process(uberizer, entry.getValue(), target);
+                if( modEntry!=null ) {
                     uberEntries.put(entryPath, modEntry);
                 } else {
                     uberEntries.remove(entryPath);
@@ -52,6 +53,6 @@ abstract public class AbstractTransformer implements Transformer
 
     abstract protected boolean matches(String entryPath);
 
-    abstract protected void process(UberEntry entry, File target) throws IOException;
+    abstract protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException;
 
 }

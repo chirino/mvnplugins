@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 /**
  * @author David Blevins
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class Paths {
 
@@ -40,6 +41,14 @@ public class Paths {
     public Paths(Set includes, Set excludes) {
         this.includes = includes;
         this.excludes = excludes;
+    }
+
+    public Set getIncludes() {
+        return includes;
+    }
+
+    public Set getExcludes() {
+        return excludes;
     }
 
     public boolean matchesIgnoreCase(String value) {

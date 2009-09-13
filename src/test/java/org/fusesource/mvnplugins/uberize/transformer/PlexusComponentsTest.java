@@ -56,7 +56,7 @@ public class PlexusComponentsTest
         uberEntry.getSources().add(resourceToFile("/components-1.xml"));
         uberEntry.getSources().add(resourceToFile("/components-2.xml"));
         entries.put(path, uberEntry);
-        transformerPlexus.process(basedir, entries);
+        transformerPlexus.process(null, basedir, entries);
         assertEquals( IOUtil.toString( getClass().getResourceAsStream( "/components-expected.xml" ) ),
                       FileUtils.fileRead( entries.get(path).getSource()) );
     }

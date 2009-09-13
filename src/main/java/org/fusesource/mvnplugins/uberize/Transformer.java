@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.util.TreeMap;
 
 /**
- * @author Hiram Chirino
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public interface Transformer {
 
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException;
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException;
 
 }

@@ -25,10 +25,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.HashMap;
 
 /**
  * @author Jason van Zyl
- * @author Hiram Chirino
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public interface Uberizer {
 
@@ -47,4 +49,24 @@ public interface Uberizer {
      */
     void uberize(File workDir, Set sourceJars, File uberJar,
                  List<Filter> filters, List<Transformer> transformers) throws IOException;
+
+    /**
+     * When a transformation can't aggregate multiple sources
+     * for an entry.. this method asks the Uberizer to pick one source for it
+     * to use.
+     *
+     * @param tree
+     * @param entry
+     * @return
+     */
+    File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry);
+
+    /**
+     * Transformations which re-map classes should updated this map.  It's a map
+     * of 'original class name' to 'new class name'.
+     *
+     * @return the classes that be been relocated.
+     */
+    public HashMap<String, String>  getClassRelocations();
+
 }

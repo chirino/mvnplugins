@@ -22,6 +22,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -45,6 +46,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.ArrayList;
 
+/**
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
+ */
 public class ApacheNoticeAgreggator implements Transformer {
 
     private static final String NOTICE_PATH = "META-INF/NOTICE";
@@ -70,7 +74,7 @@ public class ApacheNoticeAgreggator implements Transformer {
     String copyright;
 
 
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
 
         Set<String> noticeSet = new LinkedHashSet<String>();
 
@@ -98,7 +102,7 @@ public class ApacheNoticeAgreggator implements Transformer {
             noticeSet.addAll(notices);
         }
 
-        // Add all the license files..
+        // AddResource all the license files..
         ArrayList<UberEntry> matches = new ArrayList<UberEntry>();
         for (UberEntry entry : new ArrayList<UberEntry>(uberEntries.values())) {
             if (matches(entry.getPath())) {

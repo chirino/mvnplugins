@@ -72,7 +72,8 @@ import org.codehaus.plexus.util.WriterFactory;
  * @author Jason van Zyl
  * @author Mauro Talevi
  * @author David Blevins
- * @author Hiram Chirino
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
+ *
  * @goal uberize
  * @phase package
  * @requiresDependencyResolution runtime

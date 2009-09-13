@@ -30,6 +30,8 @@ import org.fusesource.mvnplugins.uberize.Uberizer;
 /**
  * A resource processor that allows the addition of an arbitrary file
  * content into the uber JAR.
+ *
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class AddResource implements Transformer {
 
@@ -41,6 +43,7 @@ public class AddResource implements Transformer {
             final UberEntry uberEntry = uberEntries.get(path);
             UberEntry modEntry = new UberEntry(path, uberEntry);
             modEntry.getSources().add(file);
+            modEntry.getSources().addAll(uberEntry.getSources());
             uberEntries.put(path, modEntry);
         }
     }

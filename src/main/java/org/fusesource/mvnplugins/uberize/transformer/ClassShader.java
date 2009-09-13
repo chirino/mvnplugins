@@ -47,6 +47,10 @@ import java.util.regex.Pattern;
 import java.util.Map.Entry;
 
 /**
+ * Uses byte code manipulation to relocate java classes to a new package.  It can optionally
+ * update resource files so that class names referenced in the files are updated with
+ * the new package names.
+ *
  * @author Jason van Zyl
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
@@ -84,7 +88,7 @@ public class ClassShader implements Transformer {
         }
 
 
-        HashMap<String, String> relocatedClasses = new HashMap<String, String>();
+        HashMap<String, String> relocatedClasses = uberizer.getClassRelocations();
         RelocatorRemapper remapper = new RelocatorRemapper(relocators);
         for (UberEntry node : new ArrayList<UberEntry>(nodes.values())) {
             String path = node.getPath();
@@ -111,7 +115,7 @@ public class ClassShader implements Transformer {
 
                 String className = classPath.replace('/','.');
                 String mappedClassName = mapClassName(relocators, className);
-                if( mappedClassName == className ) {
+                if( mappedClassName != className ) {
                     relocatedClasses.put(className, mappedClassName);
                 }
 
@@ -131,10 +135,11 @@ public class ClassShader implements Transformer {
             for (UberEntry node : new ArrayList<UberEntry>(nodes.values())) {
                 String path = node.getPath();
                 if ( resources.matches(path) && !path.endsWith(".class")) {
+
                     File file = uberizer.pickOneSource(nodes, node);
                     String content = FileUtils.fileRead(file);
                     for (Entry<String, String> entry : relocatedClasses.entrySet()) {
-                        content.replaceAll(Pattern.quote(entry.getKey()), Pattern.quote(entry.getValue()));
+                        content = content.replaceAll(Pattern.quote(entry.getKey()), entry.getValue());
                     }
                     File udpateFile = DefaultUberizer.prepareFile(workDir, node.getPath());
                     FileUtils.fileWrite(udpateFile.getPath(), content);
@@ -145,6 +150,7 @@ public class ClassShader implements Transformer {
                 }
             }
         }
+
     }
 
     public String mapClassName(List<Relocator> relocators, String name)

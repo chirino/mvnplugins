@@ -90,7 +90,7 @@ under the License.
               <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
                 
-                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.PackageShader">
+                <transformer implementation="org.fusesource.mvnplugins.uberize.transformer.ClassShader">
                   <!-- NOTE: This test checks the code path using class relocation -->
                   <relocations>
                     <relocation>

@@ -19,6 +19,13 @@ under the License.
 
 <component-set>
   <components>
+
+    <component>
+      <role>org.component.PizzaComponent</role>
+      <role-hint>default</role-hint>
+      <implementation>org.component.DefaultPizzaComponent</implementation>
+    </component>
+
     <component>
       <role>org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout</role>
       <role-hint>default</role-hint>

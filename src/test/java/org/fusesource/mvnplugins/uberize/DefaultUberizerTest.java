@@ -20,11 +20,14 @@ package org.fusesource.mvnplugins.uberize;
  */
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.jar.JarFile;
 import java.net.URLClassLoader;
 import java.net.URL;
 
@@ -32,11 +35,15 @@ import junit.framework.TestCase;
 
 import org.fusesource.mvnplugins.uberize.relocation.PackageRelocation;
 import org.fusesource.mvnplugins.uberize.transformer.PlexusComponents;
-import org.fusesource.mvnplugins.uberize.transformer.PackageShader;
+import org.fusesource.mvnplugins.uberize.transformer.ClassShader;
+import org.fusesource.mvnplugins.uberize.transformer.Paths;
+import org.codehaus.plexus.util.*;
+import sun.tools.jar.resources.jar;
 
 /**
  * @author Jason van Zyl
  * @author Mauro Talevi
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class DefaultUberizerTest extends TestCase {
     
@@ -60,7 +67,7 @@ public class DefaultUberizerTest extends TestCase {
         sources.add(new File("src/test/jars/test-artifact-1.0-SNAPSHOT.jar"));
 
         List transformers = new ArrayList();
-        PackageShader shader = new PackageShader();
+        ClassShader shader = new ClassShader();
         shader.relocations = new PackageRelocation[]{
             new PackageRelocation("org.fusesource.mvnplugins.uberize", null, null)
         };
@@ -98,18 +105,51 @@ public class DefaultUberizerTest extends TestCase {
         set.add(new File("src/test/jars/plexus-utils-1.4.1.jar"));
 
 
-        PackageShader shader = new PackageShader();
+        ClassShader shader = new ClassShader();
         shader.relocations = new PackageRelocation[]{
-                new PackageRelocation("org/codehaus/plexus/util", shadedPattern, Arrays.asList(excludes))
+            new PackageRelocation("org/codehaus/plexus/util", shadedPattern, Arrays.asList(excludes))
         };
-
+        
         List transformers = new ArrayList();
-        transformers.add(shader);
         transformers.add(new PlexusComponents());
+        transformers.add(shader);
 
         List filters = new ArrayList();
-
         s.uberize(workDir, set, jar, filters, transformers);
+    }
+
+    public void testShaderWithResourceTransformation() throws Exception {
+        Uberizer uberizer = new DefaultUberizer();
+        Set sources = new LinkedHashSet();
+        sources.add(new File("src/test/jars/test-project-1.0-SNAPSHOT.jar"));
+
+        List transformers = new ArrayList();
+        ClassShader shader = new ClassShader();
+        shader.relocations = new PackageRelocation[]{
+            new PackageRelocation("org/component", "org/uber/component", null)
+        };
+
+        shader.resources = new Paths();
+        shader.resources.includes = new HashSet();
+        shader.resources.includes.add("META-INF/plexus/components.xml");
+
+        transformers.add(new PlexusComponents());
+        transformers.add(shader);
+
+        List filters = new ArrayList();
+        File uberJar = new File(base, "testShaderWithResourceTransformation.jar");
+        uberizer.uberize(workDir, sources, uberJar, filters, transformers);
+
+
+        JarFile jar = new JarFile(uberJar);
+        InputStream is = jar.getInputStream(jar.getEntry("META-INF/plexus/components.xml"));
+        String contnent = IOUtil.toString(is);
+
+        assertFalse( contnent.contains("<role>org.component.PizzaComponent</role>") );
+        assertFalse( contnent.contains("<implementation>org.component.DefaultPizzaComponent</implementation>") );
+
+        assertTrue( contnent.contains("<role>org.uber.component.PizzaComponent</role>") );
+        assertTrue( contnent.contains("<implementation>org.uber.component.DefaultPizzaComponent</implementation>") );
     }
 
 }

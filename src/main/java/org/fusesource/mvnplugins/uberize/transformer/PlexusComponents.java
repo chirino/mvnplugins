@@ -22,6 +22,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.WriterFactory;
@@ -39,15 +40,14 @@ import java.util.TreeMap;
 
 /**
  * A transformer that aggregates plexus <code>components.xml</code> files.
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class PlexusComponents
         implements Transformer {
-    private Map components = new LinkedHashMap();
 
     public static final String COMPONENTS_XML_PATH = "META-INF/plexus/components.xml";
 
-
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
         UberEntry uberEntry = uberEntries.get(COMPONENTS_XML_PATH);
 
         // This transformer only needs to kick in when there is

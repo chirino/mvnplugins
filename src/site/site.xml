@@ -22,19 +22,27 @@ under the License.
 <project xmlns="http://maven.apache.org/DECORATION/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd"
-  name="Maven Shade plugin">
+  name="Maven Uberize plugin">
   <body>
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
-      <item name="Usage" href="usage.html"/>
     </menu>
-    <menu name="Examples">
+    <menu name="General Usage">
       <item name="Selecting Contents for Uber JAR" href="examples/includes-excludes.html"/>
-      <item name="Relocating Classes" href="examples/class-relocation.html"/>
-      <item name="Attaching the Shaded Artifact" href="examples/attached-artifact.html"/>
-      <item name="Executable JAR" href="examples/executable-jar.html"/>
-      <item name="Resource Transformers" href="examples/resource-transformers.html"/>
+      <item name="Attaching the Uberized Artifact" href="examples/attached-artifact.html"/>
+    </menu>
+    <menu name="Standard Transformers">
+      <item name="Class Shader" href="transformers/class-shader.html"/>
+      <item name="Manifest Editor" href="transformers/manifest-editor.html"/>
+    </menu>
+    <menu name="Aggregating Transformers">
+      <item name="Plexus Components" href="./transformers/plexus-components.html"/>
+      <item name="Services Appender" href="./transformers/services-appender.html"/>
+      <item name="Text Aggregator" href="./transformers/text-aggregator.html"/>
+      <item name="XML Appender" href="./transformers/xml-appender.html"/>
+      <item name="Add Resource" href="./transformers/add-resource.html"/>
+      <item name="Pick Resource" href="./transformers/pick-resource.html"/>
     </menu>
   </body>
 </project>

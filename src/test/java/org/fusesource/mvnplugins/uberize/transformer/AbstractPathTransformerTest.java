@@ -27,11 +27,14 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
- * Test for {@link XmlAppender}.
+ * Test for AbstractPathTransformer.
  *
  * @author Benjamin Bentmann
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
+ * 
  * @version $Id$
  */
 public class AbstractPathTransformerTest extends TestCase {
@@ -39,8 +42,9 @@ public class AbstractPathTransformerTest extends TestCase {
     static class MockTransformer extends AbstractPathTransformer {
         boolean matched;
 
-        protected void process(UberEntry entry, File target) throws IOException {
+        protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException {
             matched = true;
+            return entry; 
         }
     }
 
@@ -82,7 +86,7 @@ public class AbstractPathTransformerTest extends TestCase {
         TreeMap<String, UberEntry> tree = new TreeMap<String, UberEntry>();
         UberEntry enrty = new UberEntry(path);
         tree.put(path, enrty);
-        transformer.process(work, tree);
+        transformer.process(null, work, tree);
         return transformer.matched;
     }
 

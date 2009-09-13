@@ -21,6 +21,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
 
 import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 import java.io.IOException;
 import java.io.File;
@@ -30,6 +31,8 @@ import java.util.Map.Entry;
 
 /**
  * Prevents duplicate copies of the license
+ *
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class ApacheLicenseAgreggator implements Transformer {
 
@@ -37,7 +40,7 @@ public class ApacheLicenseAgreggator implements Transformer {
     private static final String LICENSE_TXT_PATH = "META-INF/LICENSE.txt";
 
 
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
         ArrayList<UberEntry> matches = new ArrayList<UberEntry>();
         for (Entry<String, UberEntry> entry : uberEntries.entrySet()) {
             String resource = entry.getKey();

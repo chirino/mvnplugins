@@ -2,6 +2,7 @@ package org.fusesource.mvnplugins.uberize.transformer;
 
 import org.fusesource.mvnplugins.uberize.UberEntry;
 import org.fusesource.mvnplugins.uberize.DefaultUberizer;
+import org.fusesource.mvnplugins.uberize.Uberizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,8 @@ import java.util.ArrayList;
 /**
  * Base class which allows applying the transformer to a user
  * configured path or path filter.
+ *
+ * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 abstract public class AbstractPathTransformer extends AbstractTransformer
 {
@@ -37,31 +40,31 @@ abstract public class AbstractPathTransformer extends AbstractTransformer
     private Paths paths;
     private boolean ignoreCase;
 
-    public void process(File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
+    public void process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries) throws IOException {
         if( getPath() !=null && !isIgnoreCase() && getPaths() ==null ) {
             // In the simple single path, case senstive case, we can just directly lookup
             // the entry vs. matching against all the entries.
             UberEntry uberEntry = uberEntries.get(getPath());
             if( uberEntry!=null ) {
-                _process(workDir, uberEntries, uberEntry);
+                _process(uberizer, workDir, uberEntries, uberEntry);
             }
         } else {
             // process all the entries that match.
             for (UberEntry uberEntry : new ArrayList<UberEntry>(uberEntries.values())) {
                 final boolean match = matches(uberEntry.getPath());
                 if (match) {
-                    _process(workDir, uberEntries, uberEntry);
+                    _process(uberizer, workDir, uberEntries, uberEntry);
                 }
             }
         }
     }
 
-    private void _process(File workDir, TreeMap<String, UberEntry> uberEntries, UberEntry uberEntry) throws IOException {
+    private void _process(Uberizer uberizer, File workDir, TreeMap<String, UberEntry> uberEntries, UberEntry uberEntry)
+            throws IOException {
+        
         File target = DefaultUberizer.prepareFile(workDir, uberEntry.getPath());
-        process(uberEntry, target);
-        if( target.exists() ) {
-            final UberEntry modEntry = new UberEntry(uberEntry);
-            modEntry.getSources().add(target);
+        UberEntry modEntry = process(uberizer, uberEntry, target);
+        if( uberEntry!=null ) {
             uberEntries.put(uberEntry.getPath(), modEntry);
         } else {
             uberEntries.remove(uberEntry.getPath());
