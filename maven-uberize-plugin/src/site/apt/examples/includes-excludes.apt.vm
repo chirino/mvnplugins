@@ -44,7 +44,7 @@ Jar Selection and Filtering
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <groupId>org.fusesource.mvnplugins</groupId>
         <artifactId>maven-uberize-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
@@ -88,7 +88,7 @@ Jar Selection and Filtering
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <groupId>org.fusesource.mvnplugins</groupId>
         <artifactId>maven-uberize-plugin</artifactId>
         <version>${project.version}</version>
         <executions>

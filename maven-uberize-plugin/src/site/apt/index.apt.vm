@@ -46,7 +46,7 @@ Maven Uberize Plugin
     <plugins>
     
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <groupId>org.fusesource.mvnplugins</groupId>
         <artifactId>maven-uberizer-plugin</artifactId>
         <version>${currentVersion}</version>
         
