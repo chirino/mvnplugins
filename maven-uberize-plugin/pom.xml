@@ -23,9 +23,9 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-     <artifactId>maven-plugins</artifactId>
-     <groupId>org.apache.maven.plugins</groupId>
-     <version>13</version>
+    <groupId>org.fusesource.mvnplugins</groupId>
+    <artifactId>mvnplugins</artifactId>
+    <version>1.1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
@@ -39,16 +39,6 @@ under the License.
   <prerequisites>
     <maven>${mavenVersion}</maven>
   </prerequisites>
-
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/plugins/trunk/maven-shade-plugin</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/plugins/trunk/maven-shade-plugin</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/plugins/trunk/maven-shade-plugin</url>
-  </scm>
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.codehaus.org/browse/MSHADE</url>
-  </issueManagement>
 
   <properties>
     <mavenVersion>2.0.6</mavenVersion>
