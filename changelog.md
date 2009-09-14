@@ -1,6 +1,9 @@
 MVN Plugins
 ===========
 
+[MVN Plugins 1.2][1_2], released 2009-09-14
+* maven-uberize-plugin: The Class Shader was not strict enough when replacing class names in a resource file 
+
 [MVN Plugins 1.1][1_1], released 2009-09-14
 -------------------------------------------
 * Added the maven-uberize-plugin
@@ -15,3 +18,4 @@ MVN Plugins
 
 [1_0]: http://mvnplugins.fusesource.org/maven/1.0
 [1_1]: http://mvnplugins.fusesource.org/maven/1.1
+[1_2]: http://mvnplugins.fusesource.org/maven/1.2

@@ -136,14 +136,27 @@ public class ClassShader implements Transformer {
 
         // Should we update resources with the class name changes?
         if( resources!=null && !relocatedClasses.isEmpty()) {
+            
+            // regex for a non class name character
+            final String ncnc = "(\\A|\\z|[^\\p{L}\\p{Nd}\\.\\$\\_])";
+
             for (UberEntry node : new ArrayList<UberEntry>(nodes.values())) {
                 String path = node.getPath();
                 if ( resources.matches(path) && !path.endsWith(".class")) {
 
                     File file = uberizer.pickOneSource(nodes, node);
                     String content = FileUtils.fileRead(file);
+
+
                     for (Entry<String, String> entry : relocatedClasses.entrySet()) {
-                        content = content.replaceAll(Pattern.quote(entry.getKey()), entry.getValue());
+
+                        // This regex is little complicated cause we don't want to partially match a class.
+                        // For example, replacing the 'test.Foo' in the 'com.myco.test.Foo' would be
+                        // a bad thing.
+                        String regex = ncnc + Pattern.quote(entry.getKey()) + ncnc;
+                        // Need to escape the $ litterals in the value...
+                        String value = entry.getValue().replaceAll("\\$", "\\\\\\$");
+                        content = content.replaceAll(regex, "$1"+ value +"$2");
                     }
                     File udpateFile = DefaultUberizer.prepareFile(workDir, node.getPath());
                     FileUtils.fileWrite(udpateFile.getPath(), content);
