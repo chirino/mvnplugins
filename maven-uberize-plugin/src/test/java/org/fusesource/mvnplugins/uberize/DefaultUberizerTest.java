@@ -38,6 +38,8 @@ import org.fusesource.mvnplugins.uberize.transformer.PlexusComponents;
 import org.fusesource.mvnplugins.uberize.transformer.ClassShader;
 import org.fusesource.mvnplugins.uberize.transformer.Resources;
 import org.codehaus.plexus.util.*;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.codehaus.plexus.logging.Logger;
 
 /**
  * @author Jason van Zyl
@@ -61,7 +63,7 @@ public class DefaultUberizerTest extends TestCase {
     }
 
     public void testShaderWithStaticInitializedClass() throws Exception {
-        Uberizer uberizer = new DefaultUberizer();
+        Uberizer uberizer = createUberizer();
         Set sources = new LinkedHashSet();
         sources.add(new File("src/test/jars/test-artifact-1.0-SNAPSHOT.jar"));
 
@@ -97,7 +99,7 @@ public class DefaultUberizerTest extends TestCase {
     }
 
     public void shaderWithPattern(String shadedPattern, File jar, String[] excludes) throws Exception {
-        Uberizer s = new DefaultUberizer();
+        Uberizer s = createUberizer();
 
         Set set = new LinkedHashSet();
         set.add(new File("src/test/jars/test-project-1.0-SNAPSHOT.jar"));
@@ -118,7 +120,8 @@ public class DefaultUberizerTest extends TestCase {
     }
 
     public void testShaderWithResourceTransformation() throws Exception {
-        Uberizer uberizer = new DefaultUberizer();
+        Uberizer uberizer = createUberizer();
+
         Set sources = new LinkedHashSet();
         sources.add(new File("src/test/jars/test-project-1.0-SNAPSHOT.jar"));
 
@@ -149,6 +152,12 @@ public class DefaultUberizerTest extends TestCase {
 
         assertTrue( contnent.contains("<role>org.uber.component.PizzaComponent</role>") );
         assertTrue( contnent.contains("<implementation>org.uber.component.DefaultPizzaComponent</implementation>") );
+    }
+
+    private DefaultUberizer createUberizer() {
+        final DefaultUberizer rc = new DefaultUberizer();
+        rc.enableLogging(new ConsoleLogger(Logger.LEVEL_INFO, "uberizer"));
+        return rc;
     }
 
 }

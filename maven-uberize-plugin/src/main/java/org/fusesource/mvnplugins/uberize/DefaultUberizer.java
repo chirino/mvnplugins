@@ -21,7 +21,6 @@ package org.fusesource.mvnplugins.uberize;
 
 import org.fusesource.mvnplugins.uberize.filter.Filter;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -194,10 +193,10 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
                 if( currentTransformer!=null ) {
                     msgPrefix = currentTransformer.getClass().getSimpleName()+": "+msgPrefix;
                 }
-                warn("  "+msgPrefix+entry.getPath());
-                warn("    Picking source: " + originalJar(pick));
+                getLogger().warn("  "+msgPrefix+entry.getPath());
+                getLogger().warn("    Picking source: " + originalJar(pick));
                 for (File dup : ignores) {
-                    warn("    Ignoring source: " + originalJar(dup));
+                    getLogger().warn("    Ignoring source: " + originalJar(dup));
                 }
             }
 
@@ -247,16 +246,6 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
 
     public HashMap<String, String>  getClassRelocations() {
         return this.classRelocations;
-    }
-
-
-    private void warn(String message) {
-        final Logger logger = getLogger();
-        if (logger != null) {
-            logger.warn(message);
-        } else {
-            System.out.println("[WARN] " + message);
-        }
     }
 
     static void getParentDirs(String path, ArrayList<String> dirs) {
