@@ -10,6 +10,8 @@ Plugins
 -------
 
 * Maven Graph Plugin: Uses the  graphviz command line tool 'dot' to generate a graphical representation of the project dependencies.
+* Maven Uberize Plugin:  Provides the capability to package the artifact in an uber-jar, including its dependencies and
+  to shade/rename/relocate the packages of some of the dependencies.
 
 ... that's it (for now) ...
 
