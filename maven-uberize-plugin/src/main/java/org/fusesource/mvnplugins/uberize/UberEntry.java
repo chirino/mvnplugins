@@ -36,7 +36,7 @@ import java.util.List;
 public class UberEntry {
 
     private final String path;
-    private final List<File> sources = new ArrayList<File>();
+    private final ArrayList<File> sources = new ArrayList<File>();
     private final List<UberEntry> previous;
 
     /**
@@ -88,7 +88,7 @@ public class UberEntry {
      *
      * @return
      */
-    public List<File> getSources() {
+    public ArrayList<File> getSources() {
         return sources;
     }
 

@@ -59,7 +59,7 @@ public interface Uberizer {
      * @param entry
      * @return
      */
-    File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry);
+    File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry) throws IOException;
 
     /**
      * Transformations which re-map classes should updated this map.  It's a map

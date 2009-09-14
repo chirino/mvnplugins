@@ -39,6 +39,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -50,21 +51,30 @@ import java.util.jar.JarOutputStream;
  */
 public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
     private final HashMap<String, String> classRelocations = new HashMap<String, String>();
-    
+    private final HashMap<File, File> extractionMapping = new HashMap<File, File>();
+    private Transformer currentTransformer;
+
+
     public void uberize(File targetDir, Set sourceJars, File uberJar, List<Filter> filters, List<Transformer> transformers)
             throws IOException {
+        classRelocations.clear();
+        extractionMapping.clear();
+        currentTransformer=null;
+
         targetDir = targetDir.getCanonicalFile();
         targetDir.mkdirs();
         FileUtils.cleanDirectory(targetDir);
         final String jarMappingTxt = new File(targetDir, "jar-mapping.txt").getPath();
-        final String transformMappingTxt = new File(targetDir, "process-mapping.txt").getPath();
+        final String transformMappingTxt = new File(targetDir, "transformation-mapping.txt").getPath();
 
         // A 'jar entry path' => UberEntry map, points to all the data
         // that is in the source sourceJars.
         TreeMap<String, UberEntry> tree = new TreeMap<String, UberEntry>();
 
+
         // Extract each jar to a seperate directory and build up the tree
         // tree to point to all the extracted files.
+        getLogger().info("Extracting jars...");
         for (Iterator i = sourceJars.iterator(); i.hasNext();) {
             File jar = (File) i.next();
 
@@ -75,6 +85,7 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
                 id = jar.getName() + "." + counter++;
                 workDir = new File(targetDir, id);
             }
+            extractionMapping.put(workDir, jar);
             FileUtils.fileAppend(jarMappingTxt, id + "=" + jar.getPath() + "\n");
 
             List jarFilters = getFilters(jar, filters);
@@ -104,9 +115,11 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
         // files.  It should instead generate new files in the provided work directory.
         int transformerCounter = 0;
         for (Transformer transformer : transformers) {
-            final String id = "process-" + (transformerCounter++);
+            getLogger().info("Applying transformer: "+transformer.getClass().getName());
+            currentTransformer = transformer;
+            final String id = "transformer-" + (transformerCounter++);
             File xformWorkDir = new File(targetDir, id);
-            FileUtils.fileAppend(transformMappingTxt, id + "=" + transformer + "\n");
+            FileUtils.fileAppend(transformMappingTxt, id + "=" + transformer.getClass().getName() + "\n");
             transformer.process(this, xformWorkDir, tree);
         }
 
@@ -122,6 +135,7 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
         }
 
         // Generate the uber jar using the transformed tree
+        getLogger().info("Uber jarring...");
         uberJar.getParentFile().mkdirs();
         JarOutputStream jos = new JarOutputStream(new FileOutputStream(uberJar));
         HashSet<String> uberDirectories = new HashSet<String>();
@@ -155,28 +169,80 @@ public class DefaultUberizer extends AbstractLogEnabled implements Uberizer {
 
     }
 
-    public File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry) {
+    public File pickOneSource(TreeMap<String, UberEntry> tree, UberEntry entry) throws IOException {
         if( entry.getSources().isEmpty() ) {
             return null;
         }
+
         if (entry.getSources().size() > 1) {
-            warn("  Overlapping sources for jar entry: " + entry.getPath());
-            int counter = 0;
-            final List<File> files = entry.getSources();
-            for (File file : files) {
-                if (counter != 0) {
-                    warn("    Ignoring source: " + file);
-                } else {
-                    warn("    Using source: " + file);
-                    UberEntry update = new UberEntry(entry);
-                    update.getSources().add(file);
-                    tree.put(entry.getPath(), update);
-                    entry = update;
+            LinkedList<File> ignores = new LinkedList<File>(entry.getSources());
+            File pick = ignores.removeFirst();
+
+            if( isFileTypeThatCanIgnoreDuplicates( entry.getPath() ) ) {
+                // We can remove it from the list if it's a duplicate of the first...
+                // If all the sources are duplicates, then we avoid logging a warning to the user.
+                for (Iterator<File> i = ignores.iterator(); i.hasNext();) {
+                    File file =  i.next();
+                    if( FileUtils.contentEquals(pick, file) ) {
+                        i.remove();
+                    }
                 }
-                counter++;
             }
+
+            if( !ignores.isEmpty() ) {
+                String msgPrefix = "Overlapping sources for jar entry: ";
+                if( currentTransformer!=null ) {
+                    msgPrefix = currentTransformer.getClass().getSimpleName()+": "+msgPrefix;
+                }
+                warn("  "+msgPrefix+entry.getPath());
+                warn("    Picking source: " + originalJar(pick));
+                for (File dup : ignores) {
+                    warn("    Ignoring source: " + originalJar(dup));
+                }
+            }
+
+            entry = new UberEntry(entry).addSource(pick);
+            tree.put(entry.getPath(), entry);
         }
         return entry.getSources().get(0);
+    }
+
+    /**
+     * Try to find the original jar for a source file.
+     * If it's a tranformed source.. then this may not be possible.
+     * 
+     * @param source
+     * @return
+     * @throws IOException
+     */
+    private File originalJar(File source) throws IOException {
+        String sourcePath = source.getCanonicalPath();
+        for (File file : extractionMapping.keySet()) {
+            if( sourcePath.startsWith(file.getCanonicalPath()+File.separator) ) {
+                return extractionMapping.get(file);
+            }
+        }
+        return source;
+    }
+
+    private boolean isFileTypeThatCanIgnoreDuplicates(String path) {
+        return path.endsWith(".class")
+                | path.endsWith(".jpg")
+                | path.endsWith(".gif")
+                | path.endsWith(".png")
+                | path.endsWith(".tiff")
+                | path.endsWith(".jar")
+                | path.endsWith(".zip")
+                | path.endsWith(".tgz")
+                | path.endsWith(".tar")
+                | path.endsWith(".so")
+                | path.endsWith(".dll")
+                | path.endsWith(".dylib")
+                | path.endsWith(".lib")
+                | path.endsWith(".exe")
+                | path.endsWith(".sh")
+                | path.endsWith(".bat")
+                ;
     }
 
     public HashMap<String, String>  getClassRelocations() {

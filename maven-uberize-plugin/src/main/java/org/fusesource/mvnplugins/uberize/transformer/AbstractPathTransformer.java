@@ -50,7 +50,7 @@ abstract public class AbstractPathTransformer extends Resources implements Trans
             if (match) {
                 File target = DefaultUberizer.prepareFile(workDir, uberEntry.getPath());
                 UberEntry modEntry = process(uberizer, uberEntry, target);
-                if( uberEntry !=null ) {
+                if( modEntry !=null ) {
                     uberEntries.put(uberEntry.getPath(), modEntry);
                 } else {
                     uberEntries.remove(uberEntry.getPath());

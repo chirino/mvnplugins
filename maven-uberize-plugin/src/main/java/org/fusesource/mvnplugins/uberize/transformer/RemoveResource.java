@@ -21,34 +21,23 @@ package org.fusesource.mvnplugins.uberize.transformer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.TreeMap;
 
 import org.fusesource.mvnplugins.uberize.UberEntry;
+import org.fusesource.mvnplugins.uberize.Transformer;
 import org.fusesource.mvnplugins.uberize.Uberizer;
 
 /**
- * A transformer that picks either the first or last resource
- * from all the available files.
+ * A resource processor that allows the removal of an arbitrary
+ * jar entries from the uber jar.
  *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
-public class PickResource extends AbstractPathTransformer {
-
-    public String pick ="first";
+public class RemoveResource extends AbstractPathTransformer {
 
     protected UberEntry process(Uberizer uberizer, UberEntry entry, File target) throws IOException {
-        final List<File> sources = entry.getSources();
-        if( sources.isEmpty() ) {
-            return entry;
-        }
-        if( "first".equals(pick) ) {
-            return new UberEntry(entry).addSource(sources.get(0));
-        } else if( "last".equals(pick) ) {
-            return new UberEntry(entry).addSource(sources.get(sources.size()-1));
-        } else {
-            throw new IllegalArgumentException("Invalid configuration. Type must be set to 'first' or 'last'");
-        }
+        // Returning null signals that we want the original entry removed.
+        return null;
     }
-
 
 }
