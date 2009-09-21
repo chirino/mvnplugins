@@ -24,6 +24,8 @@ under the License.
   xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd"
   name="Maven Uberize plugin">
   <body>
+    <menu ref="parent" />
+
     <menu name="Overview">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
@@ -44,5 +46,7 @@ under the License.
       <item name="Add Resource" href="./transformers/add-resource.html"/>
       <item name="Pick Resource" href="./transformers/pick-resource.html"/>
     </menu>
+    
+    <menu ref="reports" />
   </body>
 </project>

@@ -64,8 +64,7 @@ public class AbstractPathTransformerTest extends TestCase {
         this.transformer.ignoreCase = true;
 
         assertTrue(matches("abcdefghijklmnopqrstuvwxyz"));
-// TODO: not yet implemented.        
-//        assertTrue(matches("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+        assertTrue(matches("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
         assertFalse(matches("META-INF/MANIFEST.MF"));
     }
 

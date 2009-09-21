@@ -76,9 +76,7 @@ public class Resources {
     private boolean matchPaths(Collection p, String value) {
         for (Iterator iterator = p.iterator(); iterator.hasNext();) {
             String pattern = (String) iterator.next();
-            // TODO: inline the logic in SelectorUtils.matchPath and extend it so it supports the
-            // the ignoreCase option.
-            if (SelectorUtils.matchPath(pattern, value)) {
+            if (SelectorUtils.matchPath(pattern, value, !ignoreCase)) {
                 return true;
             }
         }
