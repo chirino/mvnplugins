@@ -1,9 +1,10 @@
 MVN Plugins
 ===========
 
-[MVN Plugins 1.3][1_3], release pending
+[MVN Plugins 1.3][1_3], release 2009-10-01
 * maven-uberize-plugin: The '<ignoreCase>true</ignoreCase>' config options now works in XmlAppender, PickResource, RemoveResource, and TextAggregator 
 * maven-uberize-plugin: Added site links to project reports and to the parent project
+* Added the maven-avro-plugin
 
 [MVN Plugins 1.2][1_2], released 2009-09-14
 * maven-uberize-plugin: The Class Shader was not strict enough when replacing class names in a resource file 
