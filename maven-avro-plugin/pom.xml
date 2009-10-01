@@ -25,12 +25,12 @@ under the License.
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.3</version>
+    <version>1.3-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>maven-avro-plugin</artifactId>
-  <version>1.3</version>
+  <version>1.3-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Avro Plugin</name>
