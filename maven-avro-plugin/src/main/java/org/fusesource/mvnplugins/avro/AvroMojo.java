@@ -18,9 +18,7 @@ package org.fusesource.mvnplugins.avro;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 
 import org.apache.avro.specific.SpecificCompiler;
 import org.apache.maven.plugin.AbstractMojo;
@@ -110,62 +108,17 @@ public class AvroMojo extends AbstractMojo {
         }
     }
 
-
-    static private String uCamel(String name) {
-        boolean upNext=true;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < name.length(); i++) {
-            char c = name.charAt(i);
-            if( Character.isJavaIdentifierPart(c) && Character.isLetterOrDigit(c)) {
-                if( upNext ) {
-                    c = Character.toUpperCase(c);
-                    upNext=false;
-                }
-                sb.append(c);
-            } else {
-                upNext=true;
-            }
-        }
-        return sb.toString();
-    }
-    
     private void processFiles(File[] mainFiles, File outputDir) throws MojoExecutionException {
         for (File file : mainFiles) {
             try {
-                
                 getLog().info("Compiling: "+file.getPath());
-                SpecificCompiler compiler;
                 if( file.getName().endsWith(".avpr") ) {
-                    compiler = SpecificCompiler.compileProtocol(file);
+                    SpecificCompiler.compileProtocol(file, outputDir);
                 } else if( file.getName().endsWith(".avsc") ) {
-                    compiler = SpecificCompiler.compileSchema(file);
+                    SpecificCompiler.compileSchema(file, outputDir);
                 } else {
                     throw new RuntimeException("Unhandled file type: "+file.getName());
                 }
-                
-                String targetName = file.getName();
-                targetName = targetName.substring(0, targetName.indexOf('.'));
-                targetName = uCamel(targetName)+ ".java";
-                
-                File target;
-                
-                String namespace = compiler.getNamespace();
-                if (namespace == null || namespace.length() == 0) {
-                    target = new File(outputDir, targetName);
-                } else {
-                    target = new File(new File(outputDir, namespace.replace('.', File.separatorChar)), targetName);
-                }
-                target.getParentFile().mkdirs();
-                
-                getLog().info("  writting: "+target.getPath());
-                
-                Writer out = new FileWriter(target);
-                try {
-                    out.write(compiler.getCode());
-                } finally {
-                    out.close();
-                }   
-               
             } catch (IOException e) {
                 throw new MojoExecutionException("Avro compile failed.", e);
             }
