@@ -3,6 +3,7 @@ MVN Plugins
 
 [MVN Plugins 1.4][1_4], release 2009-10-20
 * Now released under the The Apache Software License, Version 2.0
+* maven-avro-plugin: Upgraded to avro 1.2.0
 
 [MVN Plugins 1.3][1_3], release 2009-10-01
 * maven-uberize-plugin: The '<ignoreCase>true</ignoreCase>' config options now works in XmlAppender, PickResource, RemoveResource, and TextAggregator 
