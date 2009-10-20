@@ -21,7 +21,7 @@
 ~~ See the License for the specific language governing permissions and
 ~~ limitations under the License.
 
-Maven Avero Plugin
+Maven Avro Plugin
 
   This plugin provides the capability to compile Avro schema and protocol definitions as part of your maven build.  
 
