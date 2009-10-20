@@ -1,6 +1,9 @@
 MVN Plugins
 ===========
 
+[MVN Plugins 1.4][1_4], release 2009-10-20
+* Now released under the The Apache Software License, Version 2.0
+
 [MVN Plugins 1.3][1_3], release 2009-10-01
 * maven-uberize-plugin: The '<ignoreCase>true</ignoreCase>' config options now works in XmlAppender, PickResource, RemoveResource, and TextAggregator 
 * maven-uberize-plugin: Added site links to project reports and to the parent project
@@ -25,3 +28,4 @@ MVN Plugins
 [1_1]: http://mvnplugins.fusesource.org/maven/1.1
 [1_2]: http://mvnplugins.fusesource.org/maven/1.2
 [1_3]: http://mvnplugins.fusesource.org/maven/1.3
+[1_4]: http://mvnplugins.fusesource.org/maven/1.4
