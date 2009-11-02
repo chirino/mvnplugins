@@ -30,6 +30,7 @@
     <module>maven-graph-plugin</module>
     <module>maven-uberize-plugin</module>
     <module>maven-avro-plugin</module>
+    <module>hawtjni</module>
   </modules>
 
   <properties>
