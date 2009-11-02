@@ -78,6 +78,31 @@
     <url>http://fusesource.com/forge/gitweb?p=${forge-project-id}.git</url>
   </scm>
   
+  <repositories>
+    <repository>
+      <id>${forge-project-id}.release.m2</id>
+      <name>${forge-project-id} release repository</name>
+      <url>http://${forge-project-id}.fusesource.org/repo/release</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>${forge-project-id}.snapshot.m2</id>
+      <name>${forge-project-id} snapshot repository</name>
+      <url>http://${forge-project-id}.fusesource.org/repo/snapshot</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>    
+  </repositories>
+    
   <distributionManagement>
     <repository>
       <id>release.fusesource.org</id>
