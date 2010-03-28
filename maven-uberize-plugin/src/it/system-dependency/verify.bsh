@@ -1,0 +1,22 @@
+import java.io.*;
+import java.util.*;
+
+import org.codehaus.plexus.util.*;
+import org.codehaus.plexus.util.cli.*;
+
+File wd = new File( basedir, "target/check" );
+File jar = new File( basedir, "target/test-1.0.jar" );
+wd.mkdirs();
+Commandline cli = new Commandline();
+cli.setWorkingDirectory(wd);
+cli.createArg().setValue("jar");
+cli.createArg().setValue("-xvf");
+cli.createArg().setFile(jar);
+CommandLineUtils.executeCommandLine(cli, new DefaultConsumer(), new DefaultConsumer());
+
+File file = new File( wd, "test/foo.txt" );
+if ( !file.exists() ) {
+    throw new FileNotFoundException( "Missing: " + file.getAbsolutePath() );
+}
+
+return true;
