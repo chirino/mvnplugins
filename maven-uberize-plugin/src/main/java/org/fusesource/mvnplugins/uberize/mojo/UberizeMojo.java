@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.apache.maven.artifact.resolver.ArtifactCollector;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
@@ -289,11 +291,20 @@ public class UberizeMojo
      */
     private boolean createSourcesJar;
 
+    /**
+     * Space separated list of additional scopes of artifacts to include in the uber jar.
+     * Typically used to include system, runtime, or test scoped jar that are not part of 
+     * the standard transitive dependeny list. 
+     *
+     * @parameter default-value=""
+     */
+    private String additionalScopes;
 
     /** @throws MojoExecutionException  */
     public void execute()
         throws MojoExecutionException
     {
+        Set<String> additionalScopes = getAdditionalScopes();
         Set artifacts = new LinkedHashSet();
         Set artifactIds = new LinkedHashSet();
         Set sourceArtifacts = new LinkedHashSet();
@@ -333,22 +344,24 @@ public class UberizeMojo
                 continue;
             }
 
-            getLog().info( "Including " + artifact.getId() + " in the uber jar." );
+            add(artifacts, artifactIds, sourceArtifacts, artifact);
+        }
 
-            artifacts.add( artifact.getFile() );
-
-            artifactIds.add( getId( artifact ) );
-
-            if ( createSourcesJar )
+        if( !additionalScopes.isEmpty() ) {
+            // Also pick up scope artifacts that are not part of the default transitive deps
+            for ( Iterator it = project.getDependencyArtifacts().iterator(); it.hasNext(); )
             {
-                File file = resolveArtifactSources( artifact );
-                if ( file != null )
-                {
-                    sourceArtifacts.add( file );
+                Artifact artifact = (Artifact) it.next();
+                if( artifactIds.contains( getId( artifact ))) {
+                    continue;
+                }
+                for (String scope : additionalScopes) {
+                    if( scope.equals(artifact.getScope()) ) {
+                        add(artifacts, artifactIds, sourceArtifacts, artifact);
+                    }
                 }
             }
         }
-
 
         File outputJar = uberArtifactFileWithClassifier();
         File sourcesJar = uberSourceArtifactFileWithClassifier();
@@ -402,6 +415,40 @@ public class UberizeMojo
         catch ( Exception e )
         {
             throw new MojoExecutionException( "Error creating uber jar.", e );
+        }
+    }
+
+    private Set<String> getAdditionalScopes() {
+        HashSet<String> rc = new HashSet<String>();
+        if( additionalScopes!=null && !additionalScopes.trim().isEmpty() ) {
+            String[] strings = additionalScopes.split("\\s");
+            for (String value : strings) {
+                rc.add(value);
+            }
+        }
+        return rc;
+    }
+
+    private void add(Set artifacts, Set artifactIds, Set sourceArtifacts, Artifact artifact) {
+        if ( excludeArtifact( artifact ) )
+        {
+            getLog().info( "Excluding " + artifact.getId() + " from the uber jar." );
+
+        } else {
+            getLog().info( "Including " + artifact.getId() + " in the uber jar." );
+
+            artifacts.add( artifact.getFile() );
+
+            artifactIds.add( getId( artifact ) );
+
+            if ( createSourcesJar )
+            {
+                File file = resolveArtifactSources( artifact );
+                if ( file != null )
+                {
+                    sourceArtifacts.add( file );
+                }
+            }
         }
     }
 

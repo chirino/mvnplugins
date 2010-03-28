@@ -1,6 +1,12 @@
 MVN Plugins
 ===========
 
+[MVN Plugins 1.6][1_6], release 2010-03-28
+* maven-uberize-plugin: Added 'additionalScopes' configuration property so that you can uberize system or test scope jars.
+
+[MVN Plugins 1.5][1_5], release 2010-02-26
+* Released to Maven central
+
 [MVN Plugins 1.4][1_4], release 2009-10-20
 * Now released under the The Apache Software License, Version 2.0
 * maven-avro-plugin: Upgraded to avro 1.2.0
@@ -30,3 +36,5 @@ MVN Plugins
 [1_2]: http://mvnplugins.fusesource.org/maven/1.2
 [1_3]: http://mvnplugins.fusesource.org/maven/1.3
 [1_4]: http://mvnplugins.fusesource.org/maven/1.4
+[1_5]: http://mvnplugins.fusesource.org/maven/1.5
+[1_6]: http://mvnplugins.fusesource.org/maven/1.6
