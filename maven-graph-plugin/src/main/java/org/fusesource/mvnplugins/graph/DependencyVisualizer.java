@@ -38,6 +38,11 @@ public class DependencyVisualizer {
     boolean hideOptional;
     boolean hidePoms;
     boolean hideOmitted;
+    boolean hideExternal;
+    boolean hideVersion;
+    boolean hideGroupId;
+    boolean hideType;
+    boolean keepDot;
     String label;
     boolean hideTransitive;
     Log log;
@@ -75,6 +80,9 @@ public class DependencyVisualizer {
             if ( hidePoms && isExclusivelyType("pom") ) {
                 return true;
             }
+            if( hideExternal && roots == 0 ) {
+                return true;
+            }
             return false;
         }
 
@@ -85,20 +93,26 @@ public class DependencyVisualizer {
         public String getLabel() {
             final Artifact a = artifact;
             StringBuilder sb = new StringBuilder();
-            sb.append( a.getGroupId());
-            sb.append("\\n" +a.getArtifactId());
-            if (!isExclusivelyType("jar")) {
-                sb.append("\\n");
-                boolean first=true;
-                for (String type : getTypes()) {
-                    if( !first  ) {
-                        sb.append(" | ");
+            if( !hideGroupId ) {
+                sb.append( a.getGroupId() + "\\n");
+            }
+            sb.append( a.getArtifactId());
+            if( !hideType ) {
+                if (!isExclusivelyType("jar")) {
+                    sb.append("\\n");
+                    boolean first=true;
+                    for (String type : getTypes()) {
+                        if( !first  ) {
+                            sb.append(" | ");
+                        }
+                        first=false;
+                        sb.append(type);
                     }
-                    first=false;
-                    sb.append(type);
                 }
             }
-            sb.append("\\n" + a.getVersion());
+            if( !hideVersion ) {
+                sb.append("\\n" + a.getVersion());
+            }
             return sb.toString();
         }
 
@@ -276,7 +290,6 @@ public class DependencyVisualizer {
 
         double getWeight() {
             double rc = 1 + getRecursiveChildCount();
-
             if ( isScope("compile")) {
                 rc *= 2;
             }
@@ -493,7 +506,9 @@ public class DependencyVisualizer {
                 throw new MojoExecutionException("Execution of the 'dot' command failed.  Perhaps it's not installed.  See: http://www.graphviz.org/");
             }
             log.debug("Graph generated. ");
-            source.delete();
+            if( !keepDot ) {
+                source.delete();
+            }
 
         } catch (CommandLineException e) {
             throw new MojoExecutionException("Execution of the 'dot' command failed.", e);

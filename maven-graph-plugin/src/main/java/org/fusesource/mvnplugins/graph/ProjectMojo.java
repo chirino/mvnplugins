@@ -122,6 +122,13 @@ public class ProjectMojo extends AbstractMojo {
     private boolean hideOptional;
 
     /**
+     * If set to true if dependencies external to the reactor project should be hidden.
+     * <br/>
+     * @parameter default-value="false" expression="${hide-external}"
+     */
+    private boolean hideExternal;
+
+    /**
      * If set to true pom dependencies are not drawn.
      * <br/>
      * @parameter default-value="true" expression="${hide-poms}"
@@ -145,6 +152,34 @@ public class ProjectMojo extends AbstractMojo {
      * @parameter default-value="false" expression="${hide-transitive}"
      */
     private boolean hideTransitive;
+
+    /**
+     * If set to true then the version label will not be drawn.
+     * <br/>
+     * @parameter default-value="false" expression="${hide-version}"
+     */
+    private boolean hideVersion;
+
+    /**
+     * If set to true then the group id label will not be drawn.
+     * <br/>
+     * @parameter default-value="false" expression="${hide-group-id}"
+     */
+    private boolean hideGroupId;
+
+    /**
+     * If set to true then the module type label will not be drawn.
+     * <br/>
+     * @parameter default-value="false" expression="${hide-type}"
+     */
+    private boolean hideType;
+
+    /**
+     * If set to true then the intermidate dot file will not be deleted.
+     * <br/>
+     * @parameter default-value="false" expression="${keep-dot}"
+     */
+    private boolean keepDot;
 
     /**
      * The label for the graph.
@@ -183,6 +218,11 @@ public class ProjectMojo extends AbstractMojo {
             visualizer.hideOptional = hideOptional;
             visualizer.hidePoms = hidePoms;
             visualizer.hideOmitted = hideOmitted;
+            visualizer.hideExternal = hideExternal;
+            visualizer.hideVersion = hideVersion;
+            visualizer.hideGroupId = hideGroupId;
+            visualizer.hideType = hideType;
+            visualizer.keepDot = keepDot;
             visualizer.label = label;
             visualizer.hideTransitive = hideTransitive;
             visualizer.log = getLog();
