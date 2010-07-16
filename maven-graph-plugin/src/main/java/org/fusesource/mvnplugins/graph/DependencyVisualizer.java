@@ -120,6 +120,12 @@ public class DependencyVisualizer {
             if (isScope("test")) {
                 return "cornflowerblue";
             }
+            if (isOptional()) {
+                return "green";
+            }
+            if (isScope("provided")) {
+                return "darkgrey";
+            }
             return "black";
         }
 
