@@ -1,5 +1,10 @@
 # MVN Plugins
 
+## [MVN Plugins 1.7][1_8], release 2010-07-19
+[1_8]: http://mvnplugins.fusesource.org/maven/1.8
+
+* maven-graph-plugin: better colorization of optional and provided dependencies
+
 ## [MVN Plugins 1.7][1_7], release 2010-07-06
 [1_7]: http://mvnplugins.fusesource.org/maven/1.7
 
