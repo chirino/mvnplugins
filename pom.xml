@@ -30,6 +30,9 @@
     <module>maven-graph-plugin</module>
     <module>maven-uberize-plugin</module>
     <module>maven-avro-plugin</module>
+    <module>fuse-javadoc-skin</module>
+    <module>fuse-site-skin</module>
+    <module>fuse-jxr-skin</module>
   </modules>
 
   <properties>
