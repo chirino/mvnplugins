@@ -1,6 +1,12 @@
 # MVN Plugins
 
-## [MVN Plugins 1.7][1_8], release 2010-07-19
+## [MVN Plugins 1.9][1_9], release 2010-07-22
+[1_9]: http://mvnplugins.fusesource.org/maven/1.9
+
+* new module fuse-javadoc-skin: provides nicer looking javadoc style
+* new module fuse-jxr-skin: provides nicer looking jxr style
+
+## [MVN Plugins 1.8][1_8], release 2010-07-19
 [1_8]: http://mvnplugins.fusesource.org/maven/1.8
 
 * maven-graph-plugin: better colorization of optional and provided dependencies
