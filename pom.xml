@@ -32,6 +32,7 @@
     <module>maven-avro-plugin</module>
     <module>fuse-javadoc-skin</module>
     <module>fuse-jxr-skin</module>
+    <module>scala-mojo-support</module>
   </modules>
 
   <properties>
