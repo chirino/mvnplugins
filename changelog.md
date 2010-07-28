@@ -1,5 +1,11 @@
 # MVN Plugins
 
+## [MVN Plugins 1.10][1_10], release 2010-07-28
+[1_10]: http://mvnplugins.fusesource.org/maven/1.10
+
+* new module scala-mojo-support: a fork of git://github.com/jsuereth/scala-mojo-support.git since 
+  so that we can make it available in a maven repo
+
 ## [MVN Plugins 1.9][1_9], release 2010-07-22
 [1_9]: http://mvnplugins.fusesource.org/maven/1.9
 
