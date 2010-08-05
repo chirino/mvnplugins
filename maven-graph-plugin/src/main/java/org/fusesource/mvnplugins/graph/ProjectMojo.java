@@ -50,7 +50,7 @@ public class ProjectMojo extends AbstractMojo {
      * @parameter expression="${project}"
      * @since 1.0
      */
-    private MavenProject project;
+    protected MavenProject project;
 
     /**
      * @required
@@ -58,14 +58,14 @@ public class ProjectMojo extends AbstractMojo {
      * @parameter expression="${localRepository}"
      * @since 1.0
      */
-    private ArtifactRepository localRepository;
+    protected ArtifactRepository localRepository;
 
     /**
      * @required
      * @component
      * @since 1.0
      */
-    private ArtifactResolver artifactResolver;
+    protected ArtifactResolver artifactResolver;
 
     /**
      * @required
@@ -73,7 +73,7 @@ public class ProjectMojo extends AbstractMojo {
      * @component
      * @since 1.0
      */
-    private ArtifactFactory artifactFactory;
+    protected ArtifactFactory artifactFactory;
 
     /**
      * @required
@@ -81,14 +81,14 @@ public class ProjectMojo extends AbstractMojo {
      * @component
      * @since 1.0
      */
-    private ArtifactMetadataSource artifactMetadataSource;
+    protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
      * @required
      * @readonly
      * @component
      */
-    private ArtifactCollector artifactCollector;
+    protected ArtifactCollector artifactCollector;
 
     /**
      * @required
@@ -96,7 +96,7 @@ public class ProjectMojo extends AbstractMojo {
      * @component
      * @since 1.0
      */
-    private DependencyTreeBuilder treeBuilder;
+    protected DependencyTreeBuilder treeBuilder;
 
     /**
      * The file the diagram will be written to.  Must use a file extension that the dot command supports or just the
@@ -104,7 +104,7 @@ public class ProjectMojo extends AbstractMojo {
      * <br/>
      * @parameter default-value="${project.build.directory}/project-graph.png" expression="${graph.target}"
      */
-    private File target;
+    protected File target;
 
     /**
      * If set to true, ommitted dependencies will not be drawn.  Dependencies are marked
@@ -112,28 +112,28 @@ public class ProjectMojo extends AbstractMojo {
      * <br/>
      * @parameter default-value="true" expression="${hide-omitted}"
      */
-    private boolean hideOmitted;
+    protected boolean hideOmitted;
 
     /**
      * If set to true optional dependencies are not drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-optional}"
      */
-    private boolean hideOptional;
+    protected boolean hideOptional;
 
     /**
      * If set to true if dependencies external to the reactor project should be hidden.
      * <br/>
      * @parameter default-value="false" expression="${hide-external}"
      */
-    private boolean hideExternal;
+    protected boolean hideExternal;
 
     /**
      * If set to true pom dependencies are not drawn.
      * <br/>
      * @parameter default-value="true" expression="${hide-poms}"
      */
-    private boolean hidePoms;
+    protected boolean hidePoms;
 
     /**
      * A comma seperated list of scopes.  Dependencies which
@@ -143,7 +143,7 @@ public class ProjectMojo extends AbstractMojo {
      * <br/>
      * @parameter expression="${hide-scope}"
      */
-    private String hideScopes;
+    protected String hideScopes;
 
     /**
      * If set to true then depdencies not explicitly defined in the projects
@@ -151,42 +151,42 @@ public class ProjectMojo extends AbstractMojo {
      * <br/>
      * @parameter default-value="false" expression="${hide-transitive}"
      */
-    private boolean hideTransitive;
+    protected boolean hideTransitive;
 
     /**
      * If set to true then the version label will not be drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-version}"
      */
-    private boolean hideVersion;
+    protected boolean hideVersion;
 
     /**
      * If set to true then the group id label will not be drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-group-id}"
      */
-    private boolean hideGroupId;
+    protected boolean hideGroupId;
 
     /**
      * If set to true then the module type label will not be drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-type}"
      */
-    private boolean hideType;
+    protected boolean hideType;
 
     /**
      * If set to true then the intermidate dot file will not be deleted.
      * <br/>
      * @parameter default-value="false" expression="${keep-dot}"
      */
-    private boolean keepDot;
+    protected boolean keepDot;
 
     /**
      * The label for the graph.
      * <br/>
      * @parameter default-value="Depedency Graph for ${project.name}" expression="${graph.label}"
      */
-    private String label;
+    protected String label;
 
     /**
      * If true then the 'test scope' and 'optional' attributes are cascaded
@@ -195,7 +195,7 @@ public class ProjectMojo extends AbstractMojo {
      * <br/>
      * @parameter default-value="true" expression="${graph.cascade}"
      */
-    boolean cascade;
+    protected boolean cascade;
 
     /**
      * The direction that the graph will be laid out in.
@@ -208,7 +208,7 @@ public class ProjectMojo extends AbstractMojo {
      * <br/>
      * @parameter default-value="TB" expression="${graph.direction}"
      */
-    String direction;
+    protected String direction;
 
     public void execute() throws MojoExecutionException {
         try {
