@@ -44,8 +44,13 @@ Maven Graph Plugin
 
 * Usage
 
-  The easiest way to get started using the Maven Graph Plugin is add the following 'graph' profile to your
-  to your project's pom:
+  To create a graph on any maven project you can just type
+  
+--------------------------------------------------------------------------
+$ mvn org.fusesource.mvnplugins:maven-graph-plugin:RELEASE:project
+--------------------------------------------------------------------------  
+  
+  Or you can add the Maven Graph Plugin to your 'graph' profile in your project's pom:
 
 +--------------------------------------------------------------------------
 <project>
