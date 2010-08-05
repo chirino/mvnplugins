@@ -1,5 +1,10 @@
 # MVN Plugins
 
+## [MVN Plugins 1.10][1_11], release 2010-08-05
+[1_11]: http://mvnplugins.fusesource.org/maven/1.11
+
+* maven-graph-plugin: added maven report support 
+
 ## [MVN Plugins 1.10][1_10], release 2010-07-28
 [1_10]: http://mvnplugins.fusesource.org/maven/1.10
 
