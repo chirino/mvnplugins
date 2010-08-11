@@ -107,8 +107,8 @@ public class ProjectMojo extends AbstractMojo {
     protected File target;
 
     /**
-     * If set to true, ommitted dependencies will not be drawn.  Dependencies are marked
-     * as ommitted if it would result in a resolution conflict.
+     * If set to true, omitted dependencies will not be drawn.  Dependencies are marked
+     * as omitted if it would result in a resolution conflict.
      * <br/>
      * @parameter default-value="true" expression="${hide-omitted}"
      */
@@ -136,8 +136,8 @@ public class ProjectMojo extends AbstractMojo {
     protected boolean hidePoms;
 
     /**
-     * A comma seperated list of scopes.  Dependencies which
-     * mach the specified scopes will not be drawn.
+     * A comma separated list of scopes.  Dependencies which
+     * match the specified scopes will not be drawn.
      * <br/>
      * For example: <code>runtime,test</code>
      * <br/>
@@ -146,7 +146,7 @@ public class ProjectMojo extends AbstractMojo {
     protected String hideScopes;
 
     /**
-     * If set to true then depdencies not explicitly defined in the projects
+     * If set to true then dependencies not explicitly defined in the projects
      * pom will not be drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-transitive}"
@@ -175,7 +175,7 @@ public class ProjectMojo extends AbstractMojo {
     protected boolean hideType;
 
     /**
-     * If set to true then the intermidate dot file will not be deleted.
+     * If set to true then the intermediate dot file will not be deleted.
      * <br/>
      * @parameter default-value="false" expression="${keep-dot}"
      */
@@ -184,7 +184,7 @@ public class ProjectMojo extends AbstractMojo {
     /**
      * The label for the graph.
      * <br/>
-     * @parameter default-value="Depedency Graph for ${project.name}" expression="${graph.label}"
+     * @parameter default-value="Dependency Graph for ${project.name}" expression="${graph.label}"
      */
     protected String label;
 
