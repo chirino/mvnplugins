@@ -22,7 +22,7 @@
 
   <groupId>org.fusesource</groupId>
   <artifactId>fusesource-pom</artifactId>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>FuseSource Corp. POM</name>
