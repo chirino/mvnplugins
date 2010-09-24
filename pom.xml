@@ -23,7 +23,7 @@
   <version>1.12-SNAPSHOT</version>
   <packaging>pom</packaging>
   
-  <name>FUSE Maven Plugins</name>
+  <name>FuseSource Maven Plugins</name>
   <description>A collection of random yet handy Maven plugins.</description>
 
   <modules>
@@ -47,7 +47,7 @@
   <inceptionYear>2009</inceptionYear>
 
   <organization>
-    <name>Progress Software Inc.</name>
+    <name>FuseSource</name>
     <url>http://fusesource.com/</url>
   </organization> 
 
