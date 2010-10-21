@@ -14,7 +14,7 @@ import org.codehaus.plexus.util.IOUtil;
  * Use Jline to manage input stream, to provide arrow support (history and line navigation).
  *
  * @author David Bernard (dwayne)
- * @created 2007
+ * Created: 2007
  */
 class ConsolePiper(p: Process) extends Thread {
   val console = new ConsoleReader()

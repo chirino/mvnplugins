@@ -30,7 +30,7 @@
   <version>1.12-SNAPSHOT</version>
   <packaging>jar</packaging>
   
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   
   <description>A Javadoc skin for fusesource projects.</description>
     
