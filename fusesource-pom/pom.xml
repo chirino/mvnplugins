@@ -22,7 +22,7 @@
 
   <groupId>org.fusesource</groupId>
   <artifactId>fusesource-pom</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>pom</packaging>
 
   <name>FuseSource POM</name>
@@ -173,6 +173,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.1</version>
           <configuration>
+            <pushChanges>false</pushChanges>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <allowTimestampedSnapshots>false</allowTimestampedSnapshots>
             <preparationGoals>clean install</preparationGoals>
