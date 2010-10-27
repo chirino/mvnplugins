@@ -29,7 +29,7 @@
   <artifactId>fuse-jxr-skin</artifactId>
   <version>1.12-SNAPSHOT</version>
   
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   
   <description>A JXR fusesource skin.</description>
 

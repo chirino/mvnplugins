@@ -105,7 +105,7 @@ case class component(role : String, roleHint : Option[String]) extends MavenAnno
  * Annotations for Mojos
  **/
 /**
- * @configurator <roleHint> The configurator type to use when injecting parameter values into this Mojo.
+ * (at)configurator <roleHint> The configurator type to use when injecting parameter values into this Mojo.
  *                          The value is normally deduced from the Mojo's implementation language,
  *                          but can be specified to allow a custom ComponentConfigurator implementation to be used.
  *
