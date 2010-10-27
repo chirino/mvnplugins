@@ -33,6 +33,7 @@
     <module>fuse-javadoc-skin</module>
     <module>fuse-jxr-skin</module>
     <module>scala-mojo-support</module>
+    <module>maven-linkchecker-plugin</module>
   </modules>
 
   <properties>
