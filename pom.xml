@@ -40,6 +40,7 @@
     <module>fuse-jxr-skin</module>
     <module>scala-mojo-support</module>
     <module>maven-linkchecker-plugin</module>
+    <module>maven-updatesite-plugin</module>
   </modules>
 
   <properties>
