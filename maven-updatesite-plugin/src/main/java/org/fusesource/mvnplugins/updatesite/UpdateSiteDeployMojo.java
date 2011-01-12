@@ -273,6 +273,9 @@ public class UpdateSiteDeployMojo
                 String newDir = repositoryBasedir + postfix;
 
                 getLog().info("Moving the current update site to: " + newDir);
+                if (mvOptions == null) {
+                    mvOptions = "";
+                }
                 exec.executeCommand("mv " + mvOptions + " " + repositoryBasedir + " " + newDir);
 
                 wagon.putDirectory(inputDirectory, remoteDirectory);
