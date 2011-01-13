@@ -276,8 +276,7 @@ public class UpdateSiteDeployMojo
                 if (mvOptions == null) {
                     mvOptions = "";
                 }
-                exec.executeCommand("mv " + mvOptions + " " + repositoryBasedir + " " + newDir);
-
+                exec.executeCommand("mv " + mvOptions + " " + repositoryBasedir + "/" + remoteDirectory + " " + remoteDirectory + newDir);
                 wagon.putDirectory(inputDirectory, remoteDirectory);
 
                 if (chmod) {
