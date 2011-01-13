@@ -270,13 +270,14 @@ public class UpdateSiteDeployMojo
                 String repositoryBasedir = repository.getBasedir();
 
                 // lets move the old directory first before we push...
-                String newDir = repositoryBasedir + postfix;
+                String fromDir = repositoryBasedir + "/" + remoteDirectory;
+                String newDir = repositoryBasedir + "/" + remoteDirectory + postfix;
 
-                getLog().info("Moving the current update site to: " + newDir);
+                getLog().info("Moving the current update site from: " + fromDir + " to: " + newDir);
                 if (mvOptions == null) {
                     mvOptions = "";
                 }
-                exec.executeCommand("mv " + mvOptions + " " + repositoryBasedir + "/" + remoteDirectory + " " + remoteDirectory + newDir);
+                exec.executeCommand("mv " + mvOptions + " " + fromDir + " " + newDir);
                 wagon.putDirectory(inputDirectory, remoteDirectory);
 
                 if (chmod) {
