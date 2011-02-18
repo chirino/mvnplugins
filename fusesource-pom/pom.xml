@@ -22,7 +22,7 @@
 
   <groupId>org.fusesource</groupId>
   <artifactId>fusesource-pom</artifactId>
-  <version>1.4</version>
+  <version>1.5</version>
   <packaging>pom</packaging>
 
   <name>FuseSource POM</name>
@@ -206,41 +206,42 @@
           <artifactId>modello-maven-plugin</artifactId>
           <version>1.1</version>
         </plugin>
+        
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.1</version>
+          <configuration>
+            <pushChanges>false</pushChanges>
+            <autoVersionSubmodules>true</autoVersionSubmodules>
+            <allowTimestampedSnapshots>false</allowTimestampedSnapshots>
+            <preparationGoals>clean install</preparationGoals>
+            <goals>deploy</goals>
+            <arguments>-Prelease</arguments>
+          </configuration>
+        </plugin>
+        
       </plugins>
     </pluginManagement>
     
     <plugins>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.1</version>
-        <configuration>
-          <pushChanges>false</pushChanges>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-          <allowTimestampedSnapshots>false</allowTimestampedSnapshots>
-          <preparationGoals>clean install</preparationGoals>
-          <goals>deploy</goals>
-          <arguments>-Prelease</arguments>
-        </configuration>
-      </plugin>
-
       <!-- to allow us to use Git repositories -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-scm-plugin</artifactId>
-        <version>1.3</version>
+        <version>1.4</version>
         <dependencies>
           <dependency>
             <groupId>org.apache.maven.scm</groupId>
             <artifactId>maven-scm-provider-gitexe</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
           </dependency>
         </dependencies>
       </plugin>
         
-      <!-- Used the latest site plugin -->
-      <plugin>
+      <!-- Since site generation is not supported well /w Maven 3 yet -->
+      <!-- <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>2.1.1</version>
@@ -257,19 +258,20 @@
             </exclusions>
           </dependency>
         </dependencies>
-      </plugin>
+      </plugin> -->
       
     </plugins>
   </build>
 
-  <reporting>
+  <!-- Since site generation is not supported well /w Maven 3 yet -->
+  <!-- <reporting>
     <plugins>
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>2.1.2</version>
       </plugin>
     </plugins>
-  </reporting>
+  </reporting> -->
 
   <profiles>
 
@@ -328,6 +330,28 @@
             </executions>
           </plugin>
 
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>enforce-no-snapshots</id>
+                <goals><goal>enforce</goal></goals>
+                <configuration>
+                  <rules>
+                    <requireReleaseVersion>
+                      <message>No Snapshots Allowed!</message>
+                    </requireReleaseVersion>                
+                    <requireReleaseDeps>
+                      <message>No Snapshots Allowed!</message>
+                    </requireReleaseDeps>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+      
         </plugins>
       </build>
     </profile>
