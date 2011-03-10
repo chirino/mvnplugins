@@ -38,3 +38,48 @@ Maven Provision Plugin
 +-----
 
   Where /foo is the directory you want to provision your artifact to.
+
+  Typically you may end up provisioning lots of artifacts from different projects into the same directory in the same container
+  so rather than having to specify the directory every time you can define profiles
+
+* edit ~/.m2/settings.xml
+
+  Add the following profiles for example...
+
++-----
+<settings>
+  <profiles>
+    <profile>
+      <id>karaf</id>
+      <properties>
+        <outputDirectory>/tmp/karaf</outputDirectory>
+      </properties>
+    </profile>
+    <profile>
+      <id>tomcat</id>
+      <properties>
+        <outputDirectory>/tmp/tomcat</outputDirectory>
+      </properties>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>karaf</activeProfile>
+  </activeProfiles>
+
+...
++-----
+
+  Now you can omit the outputDirectory property and it will use karaf by default...
+
++-----
+ mvn org.fusesource.mvnplugins:maven-provision-plugin:provision
++-----
+
+  If you want to you can provision to tomcat via
+
++-----
+ mvn org.fusesource.mvnplugins:maven-provision-plugin:provision -Ptomcat
++-----
+
+  Use whatever names for the maven profiles you wish :)

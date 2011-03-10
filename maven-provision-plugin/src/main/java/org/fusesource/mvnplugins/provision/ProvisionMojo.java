@@ -172,7 +172,7 @@ public class ProvisionMojo extends AbstractMojo {
             }
         } else {
             outputDirectory.mkdirs();
-            if (!outputDirectory.exists() || outputDirectory.isDirectory()) {
+            if (!outputDirectory.exists() || !outputDirectory.isDirectory()) {
                 throw new MojoExecutionException("Failed to create output directory: " + outputDirectory);
             }
         }
