@@ -33,6 +33,7 @@
   <description>A collection of random yet handy Maven plugins.</description>
 
   <modules>
+    <module>maven-provision-plugin</module>
     <module>maven-graph-plugin</module>
     <module>maven-uberize-plugin</module>
     <module>maven-avro-plugin</module>
