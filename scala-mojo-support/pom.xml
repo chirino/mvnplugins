@@ -112,6 +112,7 @@
           </args>
         </configuration>
       </plugin>
+      <!-- this is not playing nice with maven 3
       <plugin>
         <artifactId>maven-invoker-plugin</artifactId>
         <version>1.3</version>
@@ -138,6 +139,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
     </plugins>
   </build>
 
