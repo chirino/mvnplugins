@@ -49,7 +49,7 @@
     <forge-project-id-uc>MVNPLUGINS</forge-project-id-uc>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <release-altGitURL>scm:git:ssh://git@forge.fusesource.com/${forge-project-id}.git</release-altGitURL>
+    <release-altGitURL>scm:git:git://github.com/fusesource/mvnplugins.git</release-altGitURL>
   </properties>
 
   <url>http://${forge-project-id}.fusesource.org</url>
@@ -87,9 +87,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git://forge.fusesource.com/${forge-project-id}.git</connection>
+    <connection>scm:git:git://github.com/fusesource/mvnplugins.git</connection>
     <developerConnection>${release-altGitURL}</developerConnection>
-    <url>http://github.com/chirino/mvnplugins/tree/master</url>
+    <url>http://github.com/fusesource/mvnplugins/tree/master</url>
   </scm>
       
   <distributionManagement>
