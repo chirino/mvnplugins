@@ -118,6 +118,14 @@ public class UpdateSiteDeployMojo
     private String remotehtAccessFile;
 
     /**
+     * Whether to move the old directory out of the way before uploading the new one.
+     * Defaults to "false".
+     *
+     * @parameter expression="${maven.updatesite.moveOldDirectory}" default-value="false"
+     */
+    private boolean moveOldDirectory;
+
+    /**
      * Whether to run the "chmod" command on the remote site after the deploy.
      * Defaults to "true".
      *
@@ -152,11 +160,11 @@ public class UpdateSiteDeployMojo
     private String remoteServerUrl;
 
     /**
-     * The directory used to put the update site in. Defaults to "update".
+     * The directory used to put the update site in. Defaults to "${project-version}".
      *
      * If you use the htacess generation then this directory is used as part of the redirects
      *
-     * @parameter default-value="update"
+     * @parameter default-value="${project.version}"
      */
     private String remoteDirectory;
 
@@ -273,18 +281,20 @@ public class UpdateSiteDeployMojo
                 String fromDir = repositoryBasedir + "/" + remoteDirectory;
                 String newDir = repositoryBasedir + "/" + remoteDirectory + postfix;
 
-                getLog().info("Moving the current update site from: " + fromDir + " to: " + newDir);
-                if (mvOptions == null) {
-                    mvOptions = "";
+                if (moveOldDirectory) {
+                    getLog().info("Moving the current update site from: " + fromDir + " to: " + newDir);
+                    if (mvOptions == null) {
+                        mvOptions = "";
+                    }
+                    exec.executeCommand("mv " + mvOptions + " " + fromDir + " " + newDir);
                 }
-                exec.executeCommand("mv " + mvOptions + " " + fromDir + " " + newDir);
                 wagon.putDirectory(inputDirectory, remoteDirectory);
 
                 if (chmod) {
                     exec.executeCommand("chmod " + chmodOptions + " " + chmodMode + " " + repositoryBasedir);
                 }
             } else {
-                if (timestampDirectory) {
+                if (moveOldDirectory && timestampDirectory) {
                     String updateSiteDirectory = remoteDirectory + postfix;
 
                     if (generateHtaccess) {
