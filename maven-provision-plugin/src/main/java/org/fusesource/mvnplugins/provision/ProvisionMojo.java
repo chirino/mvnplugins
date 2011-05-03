@@ -22,6 +22,7 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.AbstractArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -30,6 +31,7 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,152 +63,41 @@ public class ProvisionMojo extends AbstractMojo {
     protected MavenProject project;
 
 
-    /**
-     * @component
-     * @readonly
-     */
-    private ArtifactFactory artifactFactory;
-
-    /**
-     * @component
-     * @readonly
-     */
-    private ArtifactResolver artifactResolver;
-
-
-    /**
-     * @parameter expression="${localRepository}"
-     * @readonly
-     */
-    private ArtifactRepository localRepository;
-
-    /**
-     * Whether to run the "chmod" command on the remote site after the deploy.
-     * Defaults to "true".
-     *
-     * @parameter expression="${maven.updatesite.chmod}" default-value="true"
-     * @since 2.1
-     */
-    private boolean chmod;
-
-    /**
-     * The mode used by the "chmod" command. Only used if chmod = true.
-     * Defaults to "g+w,a+rX".
-     *
-     * @parameter expression="${maven.updatesite.chmod.mode}" default-value="g+w,a+rX"
-     * @since 2.1
-     */
-    private String chmodMode;
-
-    /**
-     * The Server ID used to deploy the site which should reference a &lt;server&gt; in your
-     * ~/.m2/settings.xml file for username/pwd
-     *
-     * @parameter expression="${updatesite.remoteServerId}"
-     */
-    private String remoteServerId;
-
-    /**
-     * The Server Server URL to deploy the site to which uses the same URL format as the
-     * distributionManagement / site / url expression in the pom.xml
-     *
-     * @parameter expression="${updatesite.remoteServerUrl}"
-     */
-    private String remoteServerUrl;
-
-    /**
-     * The directory used to put the update site in. Defaults to "update".
-     * <p/>
-     * If you use the htacess generation then this directory is used as part of the redirects
-     *
-     * @parameter default-value="update"
-     */
-    private String remoteDirectory;
-
-
-    /**
-     * The options used by the "chmod" command. Only used if chmod = true.
-     * Defaults to "-Rf".
-     *
-     * @parameter expression="${maven.updatesite.chmod.options}" default-value="-Rf"
-     * @since 2.1
-     */
-    private String chmodOptions;
-
-    /**
-     * The options used by the "mv" command to move the current update site out of the way
-     * Defaults to "".
-     *
-     * @parameter expression="${maven.updatesite.mv.options}" default-value=""
-     * @since 2.1
-     */
-    private String mvOptions;
-
-    /**
-     * The date format to use for old build directories
-     *
-     * @parameter expression="${maven.updatesite.oldBuild.dateFormat}" default-value="yyyy-MM-dd-HH-mm-ss-SSS"
-     */
-    private String oldBuildDateFormat = "yyyy-MM-dd-HH-mm-ss-SSS";
-
-
-    /**
-     * @component
-     */
-    private WagonManager wagonManager;
-
-    /**
-     * The current user system settings for use in Maven.
-     *
-     * @parameter expression="${settings}"
-     * @required
-     * @readonly
-     */
-    private Settings settings;
-
-
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (outputDirectory.exists()) {
-            if (outputDirectory.isFile()) {
-                throw new MojoExecutionException("Output directory is a file: " + outputDirectory);
+        if ("pom".equals(project.getPackaging())) {
+            getLog().debug("Ignoring pom packaging");
+            return;
+        }
+        Build build = project.getBuild();
+        if (build == null) {
+            getLog().debug("No Build available in this Project");
+            return;
+        }
+        File file = new File(build.getDirectory(), build.getFinalName() + "." + getArtifactExtension());
+        getLog().debug("Trying to detect: " + file.getAbsolutePath());
+
+        if (file.exists()) {
+            File destFile = new File(outputDirectory, file.getName());
+            try {
+                getLog().info("Copying "
+                        + file.getName() + " to "
+                        + destFile);
+                FileUtils.copyFile(file, destFile);
+
+            } catch (Exception e) {
+                throw new MojoExecutionException("Error copying artifact from " + file + " to " + destFile, e);
             }
         } else {
-            outputDirectory.mkdirs();
-            if (!outputDirectory.exists() || !outputDirectory.isDirectory()) {
-                throw new MojoExecutionException("Failed to create output directory: " + outputDirectory);
-            }
-        }
-        Artifact a = project.getArtifact();
-        String groupId = a.getGroupId();
-        String artifactId = a.getArtifactId();
-        String version = a.getVersion();
-        String packaging = a.getType();
-
-        getLog().debug("Attempting to resolve: " + groupId + ":" + artifactId + ":" + version + ":" + packaging);
-
-        Artifact toDownload = artifactFactory.createBuildArtifact(groupId, artifactId, version, packaging);
-
-        List remoteArtifactRepositories = project.getRemoteArtifactRepositories();
-
-        try {
-            artifactResolver.resolve(toDownload, remoteArtifactRepositories, localRepository);
-
-        } catch (AbstractArtifactResolutionException e) {
-            throw new MojoExecutionException("Couldn't download artifact: " + e.getMessage(), e);
-        }
-
-        File file = toDownload.getFile();
-
-        File destFile = new File(outputDirectory, file.getName());
-        try {
-            getLog().info("Copying "
-                    + file.getName() + " to "
-                    + destFile);
-            FileUtils.copyFile(file, destFile);
-
-        } catch (Exception e) {
-            throw new MojoExecutionException("Error copying artifact from " + file + " to " + destFile, e);
+            getLog().info("Artifact does not exist so cannot be provisioned: " + file.getPath());
         }
     }
 
+    private String getArtifactExtension() {
+        String packaging = project.getPackaging();
+        if ("bundle".equals(packaging)) {
+            return "jar";
+        } else {
+            return packaging;
+        }
+    }
 }
