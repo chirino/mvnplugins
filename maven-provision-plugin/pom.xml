@@ -21,12 +21,12 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.14</version>
+    <version>1.15-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>maven-provision-plugin</artifactId>
-  <version>1.14</version>
+  <version>1.15-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Provision Plugin</name>
