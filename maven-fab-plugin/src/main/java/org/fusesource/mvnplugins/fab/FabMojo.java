@@ -103,7 +103,7 @@ public class FabMojo extends AbstractMojo {
             }
 
             if( !p.containsKey(FAB_MODULE_ID) ) {
-                String id = project.getGroupId()+":"+project.getArtifact()+":"+project.getVersion()+":"+project.getArtifact().getType()+
+                String id = project.getGroupId()+":"+project.getArtifactId()+":"+project.getVersion()+":"+project.getArtifact().getType()+
                         (classifier==null ? "" : ":"+classifier);
                 p.setProperty(FAB_MODULE_ID, id);
             }
