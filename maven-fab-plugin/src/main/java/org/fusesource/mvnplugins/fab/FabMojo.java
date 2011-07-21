@@ -111,7 +111,7 @@ public class FabMojo extends AbstractMojo {
                 p.setProperty(FAB_MODULE_NAME, project.getArtifactId());
             }
             if( !p.containsKey(FAB_MODULE_DESCRIPTION) ) {
-                p.setProperty(FAB_MODULE_NAME, project.getDescription());
+                p.setProperty(FAB_MODULE_DESCRIPTION, project.getDescription());
             }
 
             if( !project.getVersion().contains("SNAPSHOT") && project.getArtifact().getFile().exists() ) {
