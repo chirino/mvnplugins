@@ -43,6 +43,7 @@
     <module>maven-updatesite-plugin</module>
     <module>maven-graph-plugin</module>
     <module>maven-fab-plugin</module>
+    <module>maven-notices-plugin</module>
   </modules>
 
   <properties>
