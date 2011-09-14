@@ -55,6 +55,7 @@ import org.apache.maven.shared.invoker.MavenInvocationException;
 
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.fusesource.mvnplugins.notices.util.DependencyPom;
 
 /**
  * A plugin for merging all legal notices for all jars in a repository.
@@ -96,38 +97,30 @@ public class MergeNoticesMojo extends AbstractMojo {
     /**
      * @parameter default-value="http://www.apache.org/"
      */    
-    private String organizationURL;   
+    private String organizationURL;
+
+    /**
+     * @parameter default-value="false"
+     */    
+    private boolean listDependencies;   
     
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            Model model = project.getOriginalModel();
-            model.setPackaging("jar");
-            model.setProfiles(null);
-            model.setBuild(null);
-            model.setArtifactId(model.getArtifactId() + "-dependencies");
-            String projectVersion = project.getVersion();
-            
-            model.setDependencies(loadDependenciesFromRepos());
-
-            Build build = new Build();
-            build.addPlugin(createShadePlugin());
-            model.setBuild(build);
-
-            // save the new pom to disk
-            String targetDir = project.getBasedir() + File.separator + "target";
-            File f = new File(targetDir, "dependency-pom.xml");
-            if (f.exists()) {
-                f.delete();
+            DependencyPom pom = new DependencyPom(project);
+            pom.addPlugin(createShadePlugin());
+            if (listDependencies) {
+                pom.addPlugin(createRemoteResourcesPlugin());
             }
-            ModelWriter writer = new DefaultModelWriter();
-            writer.write(f, null, model);
+            
+            String targetDir = project.getBasedir() + File.separator + "target";
 
-            // run a build for the new pom.xml
-            buildProject(f);
+            pom.generatePom(repositories, targetDir);
+            File jarFile = pom.buildPom();           
 
-            String jarFile = targetDir + File.separator + "target" + File.separator + model.getArtifactId() + "-" + projectVersion + ".jar";
-
-            extractNotice(targetDir, jarFile);
+            extractFile(targetDir, jarFile, "META-INF/NOTICE");
+            if (listDependencies) {
+                extractFile(targetDir, jarFile, "META-INF/DEPENDENCIES");
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -135,43 +128,16 @@ public class MergeNoticesMojo extends AbstractMojo {
         } catch (MavenInvocationException e) {
             e.printStackTrace();
         }
-
     }
 
-    private List<Dependency> loadDependenciesFromRepos() {
-        if (repositories.contains(",")) {            
-            List<Dependency> deps = new ArrayList<Dependency>();
-            for (String repo : repositories.split(",")) {
-                deps.addAll(loadDependenciesFromRepo(new File(repo)));
-            }
-            return deps;
-        } else {
-            return loadDependenciesFromRepo(new File(repositories));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Dependency> loadDependenciesFromRepo(File repo) {
-        Iterator<File> jars = FileUtils.listFiles(repo, new String[] { "jar" }, true).iterator();
-        List<Dependency> deps = new ArrayList<Dependency>();
-        while (jars.hasNext()) {
-            File jar = jars.next();
-            Dependency dependencyFromJar = dependencyFromJar(jar, repo);
-            if (dependencyFromJar != null) {
-                deps.add(dependencyFromJar);
-            }
-        }
-        return deps;
-    }
-
-    private void extractNotice(String destination, String jarFile) throws IOException, FileNotFoundException {
+    private void extractFile(String destination, File jarFile, String fileToExtract) throws IOException, FileNotFoundException {
         try {
             BufferedOutputStream dest = null;
             FileInputStream fis = new FileInputStream(jarFile);
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
-                if ("META-INF/NOTICE".equals(entry.getName())) {
+                if (fileToExtract.equals(entry.getName())) {
                     int count;
                     byte data[] = new byte[2048];
                     File metaInf = new File(destination + File.separator + "META-INF");
@@ -191,18 +157,7 @@ public class MergeNoticesMojo extends AbstractMojo {
             e.printStackTrace();
         }
     }
-
-    private void buildProject(File f) throws MavenInvocationException {
-        InvocationRequest request = new DefaultInvocationRequest();
-        request.setPomFile(f);
-        request.setBaseDirectory(f.getParentFile());
-
-        request.setGoals(Collections.singletonList("package"));
-
-        Invoker invoker = new DefaultInvoker();
-        invoker.execute(request);
-    }
-
+    
     private Plugin createShadePlugin() {
         Plugin shade = new Plugin();
         shade.setArtifactId("maven-shade-plugin");
@@ -260,61 +215,46 @@ public class MergeNoticesMojo extends AbstractMojo {
         shade.addExecution(pluginExecution);
         return shade;
     }
+    
+    private Plugin createRemoteResourcesPlugin() {
+        Plugin plugin = new Plugin();
+        
+        // reuse CXF's notice supplements list for now
+        Dependency cxfBuildTools = new Dependency();
+        cxfBuildTools.setGroupId("org.apache.cxf.build-utils");
+        cxfBuildTools.setArtifactId("cxf-buildtools");
+        cxfBuildTools.setVersion("2.4.0");
+        plugin.addDependency(cxfBuildTools);
+        
+        plugin.setArtifactId("maven-remote-resources-plugin");
+        plugin.setVersion("1.2.1");
+        PluginExecution pluginExecution = new PluginExecution();
+        pluginExecution.addGoal("process");
+        pluginExecution.setPhase("package");
 
-    private Model getPom(File jar) {
-        try {
-            ZipFile zip = new ZipFile(jar);
-            FileInputStream fis = new FileInputStream(jar);
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.getName().startsWith("META-INF") && entry.getName().endsWith("pom.xml")) {
-                    ModelReader reader = new DefaultModelReader();
-                    return reader.read(zip.getInputStream(entry), null);
-                }
-            }
-            zis.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        Xpp3Dom configuration = new Xpp3Dom("configuration");
+        
+        addNestedElement(configuration, "resourceBundles", "resourceBundle", "org.apache:apache-jar-resource-bundle:1.4");
+        addNestedElement(configuration, "supplementalModels", "supplementalModel", "notice-supplements.xml");
+        addNestedElement(configuration, "properties", "projectName", projectName);
+        
+        // we already have all the dependencies in our pom so no need to grab transitives too
+        addElement(configuration, "excludeTransitive", "true");
+        
+        pluginExecution.setConfiguration(configuration);
+        plugin.addExecution(pluginExecution);
+        return plugin;
     }
 
-    private Properties getPomProperties(File jar) {
-        try {
-            ZipFile zip = new ZipFile(jar);
-            FileInputStream fis = new FileInputStream(jar);
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.getName().startsWith("META-INF") && entry.getName().endsWith("pom.properties")) {
-                    Properties props = new Properties();
-                    props.load(zip.getInputStream(entry));
-                    return props;
-                }
-            }
-            zis.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    private void addElement(Xpp3Dom parent, String name, String value) {
+        Xpp3Dom artifactId = new Xpp3Dom(name);        
+        artifactId.setValue(value);
+        parent.addChild(artifactId);
     }
     
-    private Dependency dependencyFromJar(File jar, File repo) {
-        Model pom = getPom(jar);
-        Properties props = getPomProperties(jar);
-        Dependency dep = new Dependency();
-        if (props != null) {            
-            dep.setArtifactId(props.getProperty("artifactId"));
-            dep.setGroupId(props.getProperty("groupId"));
-            dep.setVersion(props.getProperty("version"));
-        } else if (pom != null) {            
-            dep.setArtifactId(pom.getArtifactId());
-            dep.setGroupId(pom.getGroupId());
-            dep.setVersion(pom.getVersion());
-        } else { 
-            return null;
-        }       
-        return dep;
+    private void addNestedElement(Xpp3Dom root, String parent, String child, String value) {
+        Xpp3Dom parentNode = new Xpp3Dom(parent);        
+        addElement(parentNode, child, value);
+        root.addChild(parentNode);
     }
 }
