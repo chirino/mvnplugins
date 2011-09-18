@@ -33,6 +33,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -47,6 +48,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.downloader.Downloader;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
@@ -72,6 +74,33 @@ public class MergeNoticesMojo extends AbstractMojo {
      */
     private MavenProject project;
 
+    /**
+     * Artifact downloader.
+     *
+     * @component
+     * @readonly
+     * @required
+     */
+    private Downloader downloader;
+    
+    /**
+     * The local repository taken from Maven's runtime. Typically $HOME/.m2/repository.
+     *
+     * @parameter default-value="${localRepository}"
+     * @readonly
+     * @required
+     */
+    private ArtifactRepository localRepository;
+
+    /**
+     * List of Remote Repositories used by the resolver
+     *
+     * @parameter default-value="${project.remoteArtifactRepositories}"
+     * @readonly
+     * @required
+     */
+    private List<ArtifactRepository> remoteArtifactRepositories;    
+    
     /**
      * @parameter
      * @required
@@ -102,11 +131,16 @@ public class MergeNoticesMojo extends AbstractMojo {
     /**
      * @parameter default-value="false"
      */    
-    private boolean listDependencies;   
+    private boolean listDependencies;
+    
+    /**
+     * @parameter default-value=""
+     */    
+    private String extraDependencies;   
     
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyPom pom = new DependencyPom(project);
+            DependencyPom pom = new DependencyPom(project, downloader, localRepository, remoteArtifactRepositories, extraDependencies);
             pom.addPlugin(createShadePlugin());
             if (listDependencies) {
                 pom.addPlugin(createRemoteResourcesPlugin());

@@ -15,6 +15,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -24,21 +25,42 @@ import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.downloader.DownloadException;
+import org.apache.maven.shared.downloader.DownloadNotFoundException;
+import org.apache.maven.shared.downloader.Downloader;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.codehaus.plexus.util.StringUtils;
 
 public class DependencyPom {
     
     private MavenProject project;
+    private Downloader downloader;
     private Model model;
     private String projectVersion;
     private File file;
+    private ArtifactRepository localRepository;
+    private List<ArtifactRepository> remoteArtifactRepositories;
+    private List<Dependency> extraDependencies;
 
-    public DependencyPom(MavenProject project) {
+    public DependencyPom(MavenProject project, Downloader downloader, ArtifactRepository localRepository, List<ArtifactRepository> remoteArtifactRepositories, String extraDependencies) {
         this.project = project;
+        this.downloader = downloader;
+        this.localRepository = localRepository;
+        this.remoteArtifactRepositories = remoteArtifactRepositories;
+        
+        this.extraDependencies = new ArrayList<Dependency>();
+        for (String depStr : extraDependencies.split(",")) {
+            String[] depStrSplit = depStr.split(":"); 
+            Dependency dep = new Dependency();
+            dep.setGroupId(depStrSplit[0]);
+            dep.setArtifactId(depStrSplit[1]);
+            dep.setVersion(depStrSplit[2]);
+            this.extraDependencies.add(dep);
+        }
         
         model = project.getOriginalModel();
         model.setPackaging("jar");
@@ -56,7 +78,9 @@ public class DependencyPom {
     }
 
     public void generatePom(String repositories, String targetDir) throws IOException {
-        model.setDependencies(loadDependenciesFromRepos(repositories));
+        List<Dependency> loadDependenciesFromRepos = loadDependenciesFromRepos(repositories);
+        loadDependenciesFromRepos.addAll(extraDependencies);
+        model.setDependencies(loadDependenciesFromRepos);
         
         file = new File(targetDir, "dependency-pom.xml");
         if (file.exists()) {
@@ -159,7 +183,7 @@ public class DependencyPom {
         Model pom = getPom(jar);
         Properties props = getPomProperties(jar);
         Dependency dep = new Dependency();
-        if (props != null) {            
+        if (props != null) {   
             dep.setArtifactId(props.getProperty("artifactId"));
             dep.setGroupId(props.getProperty("groupId"));
             dep.setVersion(props.getProperty("version"));
@@ -168,8 +192,24 @@ public class DependencyPom {
             dep.setGroupId(pom.getGroupId());
             dep.setVersion(pom.getVersion());
         } else { 
-            return null;
+            String version = jar.getParentFile().getName();
+            String artifactId = jar.getParentFile().getParentFile().getName();
+            String groupIdSep = StringUtils.replace(jar.getParentFile().getParentFile().getParentFile().getPath(), repo.getPath(), "");
+            String groupId = groupIdSep.replace(File.separatorChar, '.');
+            groupId = groupId.startsWith(".") ? groupId.substring(1) : groupId;
+            groupId = groupId.endsWith(".") ? groupId.substring(0, groupId.length() - 1) : groupId;
+            dep.setArtifactId(artifactId);
+            dep.setGroupId(groupId);
+            dep.setVersion(version);
         }       
+        
+        try {
+            downloader.download( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), localRepository, remoteArtifactRepositories );
+        } catch (Exception e) {
+            e.printStackTrace();
+            dep = null;
+        }
+        
         return dep;
     }
 }
