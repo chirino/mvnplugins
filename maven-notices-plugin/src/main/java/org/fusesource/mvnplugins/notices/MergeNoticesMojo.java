@@ -138,6 +138,11 @@ public class MergeNoticesMojo extends AbstractMojo {
      */    
     private String extraDependencies;   
     
+    /**
+     * @parameter default-value="notice-supplements.xml"
+     */    
+    private String noticeSupplements;       
+    
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             DependencyPom pom = new DependencyPom(project, downloader, localRepository, remoteArtifactRepositories, extraDependencies);
@@ -254,11 +259,11 @@ public class MergeNoticesMojo extends AbstractMojo {
         Plugin plugin = new Plugin();
         
         // reuse CXF's notice supplements list for now
-        Dependency cxfBuildTools = new Dependency();
-        cxfBuildTools.setGroupId("org.apache.cxf.build-utils");
-        cxfBuildTools.setArtifactId("cxf-buildtools");
-        cxfBuildTools.setVersion("2.4.0");
-        plugin.addDependency(cxfBuildTools);
+//        Dependency cxfBuildTools = new Dependency();
+//        cxfBuildTools.setGroupId("org.apache.cxf.build-utils");
+//        cxfBuildTools.setArtifactId("cxf-buildtools");
+//        cxfBuildTools.setVersion("2.4.0");
+//        plugin.addDependency(cxfBuildTools);
         
         plugin.setArtifactId("maven-remote-resources-plugin");
         plugin.setVersion("1.2.1");
@@ -269,7 +274,7 @@ public class MergeNoticesMojo extends AbstractMojo {
         Xpp3Dom configuration = new Xpp3Dom("configuration");
         
         addNestedElement(configuration, "resourceBundles", "resourceBundle", "org.apache:apache-jar-resource-bundle:1.4");
-        addNestedElement(configuration, "supplementalModels", "supplementalModel", "notice-supplements.xml");
+        addNestedElement(configuration, "supplementalModels", "supplementalModel", noticeSupplements);
         addNestedElement(configuration, "properties", "projectName", projectName);
         
         // we already have all the dependencies in our pom so no need to grab transitives too
