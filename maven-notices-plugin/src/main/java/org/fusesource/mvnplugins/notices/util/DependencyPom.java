@@ -67,8 +67,12 @@ public class DependencyPom {
         model.setProfiles(null);
         model.setBuild(null);
         model.setArtifactId(model.getArtifactId() + "-dependencies");
+        
         projectVersion = project.getVersion();
 
+        model.setVersion(projectVersion);
+        model.setParent(null);
+        
         Build build = new Build();
         model.setBuild(build);
     }
