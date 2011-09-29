@@ -19,6 +19,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.io.DefaultModelReader;
 import org.apache.maven.model.io.DefaultModelWriter;
@@ -71,7 +72,6 @@ public class DependencyPom {
         projectVersion = project.getVersion();
 
         model.setVersion(projectVersion);
-        model.setParent(null);
         
         Build build = new Build();
         model.setBuild(build);
@@ -99,6 +99,7 @@ public class DependencyPom {
             InvocationRequest request = new DefaultInvocationRequest();
             request.setPomFile(file);
             request.setBaseDirectory(file.getParentFile());
+            request.setLocalRepositoryDirectory(new File(localRepository.getBasedir()));
         
             request.setGoals(Collections.singletonList("package"));
         
