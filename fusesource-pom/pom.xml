@@ -22,7 +22,7 @@
 
   <groupId>org.fusesource</groupId>
   <artifactId>fusesource-pom</artifactId>
-  <version>1.8</version>
+  <version>1.9</version>
   <packaging>pom</packaging>
 
   <name>FuseSource POM</name>
@@ -356,6 +356,35 @@
         </plugins>
       </build>
     </profile>
+    
+    <profile>
+      <id>enforce-no-snapshots</id>
+      <plugins>
+        <build>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>enforce-no-snapshots</id>
+                <goals><goal>enforce</goal></goals>
+                <configuration>
+                  <rules>
+                    <requireReleaseVersion>
+                      <message>No Snapshots Allowed!</message>
+                    </requireReleaseVersion>                
+                    <requireReleaseDeps>
+                      <message>No Snapshots Allowed!</message>
+                    </requireReleaseDeps>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile> 
     
     <!-- enables downloading from fusesource public repositories -->
     <profile>
