@@ -142,10 +142,15 @@ public class MergeNoticesMojo extends AbstractMojo {
      * @parameter default-value="notice-supplements.xml"
      */    
     private String noticeSupplements;       
+
+    /**
+     * @parameter default-value="org.apache.servicemix:parent:VERSION"
+     */    
+    private String defaultParent;  
     
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyPom pom = new DependencyPom(project, downloader, localRepository, remoteArtifactRepositories, extraDependencies);
+            DependencyPom pom = new DependencyPom(project, downloader, localRepository, remoteArtifactRepositories, extraDependencies, defaultParent);
             pom.addPlugin(createShadePlugin());
             if (listDependencies) {
                 pom.addPlugin(createRemoteResourcesPlugin());

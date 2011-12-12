@@ -3,8 +3,11 @@ package org.fusesource.mvnplugins.notices.util;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,9 +34,11 @@ import org.apache.maven.shared.downloader.DownloadNotFoundException;
 import org.apache.maven.shared.downloader.Downloader;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
+import org.apache.maven.shared.invoker.InvocationOutputHandler;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.apache.maven.shared.invoker.PrintStreamHandler;
 import org.codehaus.plexus.util.StringUtils;
 
 public class DependencyPom {
@@ -47,7 +52,7 @@ public class DependencyPom {
     private List<ArtifactRepository> remoteArtifactRepositories;
     private List<Dependency> extraDependencies;
 
-    public DependencyPom(MavenProject project, Downloader downloader, ArtifactRepository localRepository, List<ArtifactRepository> remoteArtifactRepositories, String extraDependencies) {
+    public DependencyPom(MavenProject project, Downloader downloader, ArtifactRepository localRepository, List<ArtifactRepository> remoteArtifactRepositories, String extraDependencies, String defaultParent) {
         this.project = project;
         this.downloader = downloader;
         this.localRepository = localRepository;
@@ -67,16 +72,29 @@ public class DependencyPom {
         model.setPackaging("jar");
         model.setProfiles(null);
         model.setBuild(null);
-        model.setArtifactId(model.getArtifactId() + "-dependencies");
+        model.setArtifactId(model.getArtifactId() + "-dependencies");       
         
         projectVersion = project.getVersion();
-
         model.setVersion(projectVersion);
+        
+        setParent(defaultParent);
         
         Build build = new Build();
         model.setBuild(build);
     }
     
+    private void setParent(String defaultParent) {
+        // hack to go from maven coordinate string to Parent obj. TODO any Maven util class to do this?
+        String[] strings = defaultParent.split(":");
+        model.getParent().setGroupId(strings[0]);
+        model.getParent().setArtifactId(strings[1]);        
+        if ("VERSION".equals(strings[2])) {
+            model.getParent().setVersion(projectVersion);            
+        } else {
+            model.getParent().setVersion(strings[2]);
+        }
+    }
+
     public void addPlugin(Plugin plugin) {
         model.getBuild().addPlugin(plugin);        
     }
@@ -100,11 +118,21 @@ public class DependencyPom {
             request.setPomFile(file);
             request.setBaseDirectory(file.getParentFile());
             request.setLocalRepositoryDirectory(new File(localRepository.getBasedir()));
-        
             request.setGoals(Collections.singletonList("package"));
-        
-            Invoker invoker = new DefaultInvoker();
-            invoker.execute(request);
+            
+            PrintStream invokerLog = null;
+            try {
+                invokerLog = new PrintStream(new FileOutputStream(file.getAbsoluteFile().toString() + ".log"));                            
+                request.setOutputHandler(new PrintStreamHandler(invokerLog, false));            
+            
+                Invoker invoker = new DefaultInvoker();
+                invoker.execute(request);
+            } catch (FileNotFoundException e) {
+            } finally {
+                if (invokerLog != null) {
+                    invokerLog.close();    
+                }
+            }
             
             return new File(project.getBasedir() + File.separator + "target" 
                     + File.separator + "target" + File.separator + model.getArtifactId() + "-" + projectVersion + ".jar");           
