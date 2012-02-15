@@ -26,7 +26,7 @@
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>mvnplugins</artifactId>
-  <version>1.22</version>
+  <version>1.23-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <name>FuseSource Maven Plugins</name>
