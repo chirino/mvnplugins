@@ -22,19 +22,15 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Parent;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.io.DefaultModelReader;
 import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.model.io.ModelReader;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.downloader.DownloadException;
-import org.apache.maven.shared.downloader.DownloadNotFoundException;
 import org.apache.maven.shared.downloader.Downloader;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
-import org.apache.maven.shared.invoker.InvocationOutputHandler;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
@@ -156,8 +152,16 @@ public class DependencyPom {
     private List<Dependency> loadDependenciesFromRepo(File repo) {
         Iterator<File> jars = FileUtils.listFiles(repo, new String[] { "jar" }, true).iterator();
         List<Dependency> deps = new ArrayList<Dependency>();
+        int currentJarNum = 0;
         while (jars.hasNext()) {
             File jar = jars.next();
+            
+            // ArtifactResolver leaves file handles around so need to clean up
+            // or we will run out of file descriptors
+            if (currentJarNum++ % 100 == 0) {
+                System.gc();    
+                System.runFinalization();                
+            }
             Dependency dependencyFromJar = dependencyFromJar(jar, repo);
             if (dependencyFromJar != null) {
                 deps.add(dependencyFromJar);
@@ -240,9 +244,8 @@ public class DependencyPom {
             downloader.download( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), localRepository, remoteArtifactRepositories );
         } catch (Exception e) {
             e.printStackTrace();
-            dep = null;
-        }
-        
+            dep = null;            
+        }         
         return dep;
     }
 }
