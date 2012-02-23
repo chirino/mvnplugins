@@ -23,11 +23,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.plugin.AbstractMojo;
@@ -54,15 +58,6 @@ public class MergeNoticesMojo extends AbstractMojo {
      * @required
      */
     private MavenProject project;
-
-    /**
-     * Artifact downloader.
-     *
-     * @component
-     * @readonly
-     * @required
-     */
-    private Downloader downloader;
     
     /**
      * The local repository taken from Maven's runtime. Typically $HOME/.m2/repository.
@@ -81,6 +76,25 @@ public class MergeNoticesMojo extends AbstractMojo {
      * @required
      */
     private List<ArtifactRepository> remoteArtifactRepositories;    
+    
+    /**
+     * Artifact resolver.
+     *
+     * @component
+     * @readonly
+     * @required
+     */
+    private ArtifactResolver resolver;
+    
+    /**
+     * @component
+     */
+    private ArtifactFactory factory;
+    
+    /**
+     * @component
+     */
+    private ArtifactMetadataSource artifactMetadataSource;    
     
     /**
      * @parameter
@@ -131,7 +145,10 @@ public class MergeNoticesMojo extends AbstractMojo {
     
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyPom pom = new DependencyPom(project, downloader, localRepository, remoteArtifactRepositories, extraDependencies, defaultParent);
+            DependencyPom pom = new DependencyPom(project, localRepository, remoteArtifactRepositories, extraDependencies, defaultParent);
+            pom.setResolver(resolver);
+            pom.setArtifactMetadataSource(artifactMetadataSource);
+            pom.setFactory(factory);
             pom.addPlugin(createShadePlugin());
             if (listDependencies) {
                 pom.addPlugin(createRemoteResourcesPlugin());
@@ -142,9 +159,13 @@ public class MergeNoticesMojo extends AbstractMojo {
             pom.generatePom(repositories, targetDir);
             File jarFile = pom.buildPom();           
 
-            extractFile(targetDir, jarFile, "META-INF/NOTICE");
-            if (listDependencies) {
-                extractFile(targetDir, jarFile, "META-INF/DEPENDENCIES");
+            if (jarFile.exists()) {
+                extractFile(targetDir, jarFile, "META-INF/NOTICE");
+                if (listDependencies) {
+                    extractFile(targetDir, jarFile, "META-INF/DEPENDENCIES");
+                }
+            } else {
+                getLog().error("Could not generate notices, please check target/dependency-pom.xml.log for details.");
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

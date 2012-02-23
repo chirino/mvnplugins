@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -18,7 +19,12 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.DebugResolutionListener;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -35,24 +41,27 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
+import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.StringUtils;
 
 public class DependencyPom {
     
     private MavenProject project;
-    private Downloader downloader;
     private Model model;
     private String projectVersion;
     private File file;
     private ArtifactRepository localRepository;
     private List<ArtifactRepository> remoteArtifactRepositories;
-    private List<Dependency> extraDependencies;
+    private List<Dependency> extraDependencies;    
+    private ArtifactResolver resolver;
+    private ArtifactFactory factory;
+    private ArrayList listeners;
+    private ArtifactMetadataSource artifactMetadataSource;
 
-    public DependencyPom(MavenProject project, Downloader downloader, ArtifactRepository localRepository, List<ArtifactRepository> remoteArtifactRepositories, String extraDependencies, String defaultParent) {
+    public DependencyPom(MavenProject project, ArtifactRepository localRepository, List<ArtifactRepository> remoteArtifactRepositories, String extraDependencies, String defaultParent) {
         this.project = project;
-        this.downloader = downloader;
         this.localRepository = localRepository;
-        this.remoteArtifactRepositories = remoteArtifactRepositories;
+        this.remoteArtifactRepositories = remoteArtifactRepositories;       
         
         this.extraDependencies = new ArrayList<Dependency>();
         if (extraDependencies != null) {
@@ -65,6 +74,8 @@ public class DependencyPom {
                 this.extraDependencies.add(dep);
             }
         }
+        
+        listeners = new ArrayList();
         
         model = project.getOriginalModel();
         model.setPackaging("jar");
@@ -142,7 +153,12 @@ public class DependencyPom {
         if (repositories.contains(",")) {            
             List<Dependency> deps = new ArrayList<Dependency>();
             for (String repo : repositories.split(",")) {
-                deps.addAll(loadDependenciesFromRepo(new File(repo)));
+                List<Dependency> loadDependenciesFromRepo = loadDependenciesFromRepo(new File(repo));
+                for (Dependency dep : loadDependenciesFromRepo) {
+                    if (dep != null && !dependencyExists(dep, deps)) {
+                        deps.add(dep);
+                    }
+                }
             }
             return deps;
         } else {
@@ -165,13 +181,24 @@ public class DependencyPom {
                 System.runFinalization();                
             }
             Dependency dependencyFromJar = dependencyFromJar(jar, repo);
-            if (dependencyFromJar != null) {
+            if (dependencyFromJar != null && !dependencyExists(dependencyFromJar, deps)) {
                 deps.add(dependencyFromJar);
             }
         }
         return deps;
     }    
     
+    private boolean dependencyExists(Dependency dependencyFromJar, List<Dependency> deps) {
+        for (Dependency dep : deps) {
+            if (dep.getGroupId().equals(dependencyFromJar.getGroupId()) && 
+                    dep.getArtifactId().equals(dependencyFromJar.getArtifactId()) &&
+                    dep.getVersion().equals(dependencyFromJar.getVersion())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Model getPom(File jar) {
         try {
             ZipFile zip = new ZipFile(jar);
@@ -243,11 +270,36 @@ public class DependencyPom {
         }       
         
         try {
-            downloader.download( dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), localRepository, remoteArtifactRepositories );
+            Artifact artifact = getFactory().createArtifact(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getScope(), dep.getType());
+            HashSet<Artifact> artifacts = new HashSet<Artifact>(1);            
+            getResolver().resolveTransitively(artifacts, project.getArtifact(), remoteArtifactRepositories, localRepository, getArtifactMetadataSource(), listeners);
         } catch (Exception e) {
-            e.printStackTrace();
             dep = null;            
         }         
         return dep;
+    }
+
+    public void setResolver(ArtifactResolver resolver) {
+        this.resolver = resolver;
+    }
+
+    public ArtifactResolver getResolver() {
+        return resolver;
+    }
+
+    public void setFactory(ArtifactFactory factory) {
+        this.factory = factory;
+    }
+
+    public ArtifactFactory getFactory() {
+        return factory;
+    }
+
+    public void setArtifactMetadataSource(ArtifactMetadataSource artifactMetadataSource) {
+        this.artifactMetadataSource = artifactMetadataSource;
+    }
+
+    public ArtifactMetadataSource getArtifactMetadataSource() {
+        return artifactMetadataSource;
     }
 }
