@@ -55,13 +55,15 @@ public class DependencyPom {
         this.remoteArtifactRepositories = remoteArtifactRepositories;
         
         this.extraDependencies = new ArrayList<Dependency>();
-        for (String depStr : extraDependencies.split(",")) {
-            String[] depStrSplit = depStr.split(":"); 
-            Dependency dep = new Dependency();
-            dep.setGroupId(depStrSplit[0]);
-            dep.setArtifactId(depStrSplit[1]);
-            dep.setVersion(depStrSplit[2]);
-            this.extraDependencies.add(dep);
+        if (extraDependencies != null) {
+            for (String depStr : extraDependencies.split(",")) {
+                String[] depStrSplit = depStr.split(":");
+                Dependency dep = new Dependency();
+                dep.setGroupId(depStrSplit[0]);
+                dep.setArtifactId(depStrSplit[1]);
+                dep.setVersion(depStrSplit[2]);
+                this.extraDependencies.add(dep);
+            }
         }
         
         model = project.getOriginalModel();
