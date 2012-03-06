@@ -25,6 +25,8 @@ import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.resolver.DebugResolutionListener;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -57,6 +59,7 @@ public class DependencyPom {
     private ArtifactFactory factory;
     private ArrayList listeners;
     private ArtifactMetadataSource artifactMetadataSource;
+    private MavenSession session;
 
     public DependencyPom(MavenProject project, ArtifactRepository localRepository, List<ArtifactRepository> remoteArtifactRepositories, String extraDependencies, String defaultParent) {
         this.project = project;
@@ -128,7 +131,15 @@ public class DependencyPom {
             request.setBaseDirectory(file.getParentFile());
             request.setLocalRepositoryDirectory(new File(localRepository.getBasedir()));
             request.setGoals(Collections.singletonList("package"));
-            
+            request.setProfiles(project.getActiveProfiles());
+            request.setProperties(project.getProperties());
+            request.setShellEnvironmentInherited(true);
+            request.setUserSettingsFile(session.getRequest().getUserSettingsFile());
+            if (session.getRequest().getLoggingLevel() == MavenExecutionRequest.LOGGING_LEVEL_DEBUG) {
+                request.setDebug(true);
+            }
+            request.setOffline(session.getRequest().isOffline());
+
             PrintStream invokerLog = null;
             try {
                 invokerLog = new PrintStream(new FileOutputStream(file.getAbsoluteFile().toString() + ".log"));                            
@@ -191,8 +202,7 @@ public class DependencyPom {
     private boolean dependencyExists(Dependency dependencyFromJar, List<Dependency> deps) {
         for (Dependency dep : deps) {
             if (dep.getGroupId().equals(dependencyFromJar.getGroupId()) && 
-                    dep.getArtifactId().equals(dependencyFromJar.getArtifactId()) &&
-                    dep.getVersion().equals(dependencyFromJar.getVersion())) {
+                    dep.getArtifactId().equals(dependencyFromJar.getArtifactId())) {
                 return true;
             }
         }
@@ -301,5 +311,9 @@ public class DependencyPom {
 
     public ArtifactMetadataSource getArtifactMetadataSource() {
         return artifactMetadataSource;
+    }
+
+    public void setSession(MavenSession session) {
+        this.session = session;        
     }
 }

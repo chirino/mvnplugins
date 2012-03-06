@@ -32,6 +32,7 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.plugin.AbstractMojo;
@@ -97,6 +98,15 @@ public class MergeNoticesMojo extends AbstractMojo {
     private ArtifactMetadataSource artifactMetadataSource;    
     
     /**
+     * The Maven Session Object
+     *
+     * @parameter expression="${session}"
+     * @required
+     * @readonly
+     */
+    protected MavenSession session;
+    
+    /**
      * @parameter
      * @required
      */
@@ -149,11 +159,11 @@ public class MergeNoticesMojo extends AbstractMojo {
             pom.setResolver(resolver);
             pom.setArtifactMetadataSource(artifactMetadataSource);
             pom.setFactory(factory);
+            pom.setSession(session);
             pom.addPlugin(createShadePlugin());
             if (listDependencies) {
                 pom.addPlugin(createRemoteResourcesPlugin());
             }
-            
             String targetDir = project.getBasedir() + File.separator + "target";
 
             pom.generatePom(repositories, targetDir);
