@@ -25,12 +25,12 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.25</version>
+    <version>1.26-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>maven-linkchecker-plugin</artifactId>
-  <version>1.25</version>
+  <version>1.26-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>LinkChecker Maven Plugin</name>
