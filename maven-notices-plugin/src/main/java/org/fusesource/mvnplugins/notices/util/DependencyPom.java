@@ -134,7 +134,9 @@ public class DependencyPom {
             request.setProfiles(project.getActiveProfiles());
             request.setProperties(project.getProperties());
             request.setShellEnvironmentInherited(true);
-            request.setUserSettingsFile(session.getRequest().getUserSettingsFile());
+            if (session.getRequest().getUserSettingsFile().exists()) {
+                request.setUserSettingsFile(session.getRequest().getUserSettingsFile());
+            }
             if (session.getRequest().getLoggingLevel() == MavenExecutionRequest.LOGGING_LEVEL_DEBUG) {
                 request.setDebug(true);
             }
