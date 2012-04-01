@@ -21,12 +21,12 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.26-SNAPSHOT</version>
+    <version>1.26</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>maven-avro-plugin</artifactId>
-  <version>1.26-SNAPSHOT</version>
+  <version>1.26</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Avro Plugin</name>
