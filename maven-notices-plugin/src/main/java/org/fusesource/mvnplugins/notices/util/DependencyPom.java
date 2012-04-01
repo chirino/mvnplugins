@@ -283,8 +283,11 @@ public class DependencyPom {
         
         try {
             Artifact artifact = getFactory().createArtifact(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getScope(), dep.getType());
-            HashSet<Artifact> artifacts = new HashSet<Artifact>(1);            
-            getResolver().resolveTransitively(artifacts, project.getArtifact(), remoteArtifactRepositories, localRepository, getArtifactMetadataSource(), listeners);
+            // TODO this should work but resolveTransitively is not trying to download the artifact... use resolveAlways for now
+            // HashSet<Artifact> artifacts = new HashSet<Artifact>(1);            
+            // getResolver().resolveTransitively(artifacts, project.getArtifact(), remoteArtifactRepositories, localRepository, getArtifactMetadataSource(), listeners);
+            getResolver().resolveAlways(artifact, remoteArtifactRepositories, localRepository);
+
         } catch (Exception e) {
             dep = null;            
         }         
