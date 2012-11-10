@@ -23,15 +23,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.maven.artifact.factory.ArtifactFactory;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
@@ -39,9 +34,9 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.downloader.Downloader;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 
+import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.fusesource.mvnplugins.notices.util.DependencyPom;
 
@@ -69,34 +64,6 @@ public class MergeNoticesMojo extends AbstractMojo {
      */
     private ArtifactRepository localRepository;
 
-    /**
-     * List of Remote Repositories used by the resolver
-     *
-     * @parameter default-value="${project.remoteArtifactRepositories}"
-     * @readonly
-     * @required
-     */
-    private List<ArtifactRepository> remoteArtifactRepositories;    
-    
-    /**
-     * Artifact resolver.
-     *
-     * @component
-     * @readonly
-     * @required
-     */
-    private ArtifactResolver resolver;
-    
-    /**
-     * @component
-     */
-    private ArtifactFactory factory;
-    
-    /**
-     * @component
-     */
-    private ArtifactMetadataSource artifactMetadataSource;    
-    
     /**
      * The Maven Session Object
      *
@@ -144,21 +111,25 @@ public class MergeNoticesMojo extends AbstractMojo {
     private String extraDependencies;   
     
     /**
+     * @parameter default-value=""
+     */    
+    private String excludeDependencies;   
+    
+    /**
      * @parameter default-value="notice-supplements.xml"
      */    
     private String noticeSupplements;       
 
     /**
-     * @parameter default-value="org.apache.servicemix:parent:VERSION"
+     * @parameter default-value=""
      */    
     private String defaultParent;  
     
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            DependencyPom pom = new DependencyPom(project, localRepository, remoteArtifactRepositories, extraDependencies, defaultParent);
-            pom.setResolver(resolver);
-            pom.setArtifactMetadataSource(artifactMetadataSource);
-            pom.setFactory(factory);
+        	long start = System.currentTimeMillis();
+        	
+            DependencyPom pom = new DependencyPom(project, localRepository, extraDependencies, defaultParent, excludeDependencies);
             pom.setSession(session);
             pom.addPlugin(createShadePlugin());
             if (listDependencies) {
@@ -174,9 +145,11 @@ public class MergeNoticesMojo extends AbstractMojo {
                 if (listDependencies) {
                     extractFile(targetDir, jarFile, "META-INF/DEPENDENCIES");
                 }
+                getLog().info("Notices generated in " + (System.currentTimeMillis() - start) + "ms.");
             } else {
-                getLog().error("Could not generate notices, please check target/dependency-pom.xml.log for details.");
-            }
+                getLog().error(IOUtil.toString(new FileInputStream(targetDir + "/dependency-pom.xml.log")));
+                throw new MojoExecutionException("Could not generate notices, please check target/dependency-pom.xml.log for details.");
+            }            
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -224,6 +197,14 @@ public class MergeNoticesMojo extends AbstractMojo {
 
         Xpp3Dom configuration = new Xpp3Dom("configuration");
 
+        Xpp3Dom artifactSet = new Xpp3Dom("artifactSet");
+        configuration.addChild(artifactSet);
+        Xpp3Dom artifactSetIncludes = new Xpp3Dom("includes");
+        artifactSet.addChild(artifactSetIncludes);
+        Xpp3Dom artifactSetInclude = new Xpp3Dom("include");
+        artifactSetInclude.setValue("*:*:jar:*");
+        artifactSetIncludes.addChild(artifactSetInclude);
+        
         // filters element
         Xpp3Dom filters = new Xpp3Dom("filters");
         configuration.addChild(filters);
@@ -274,13 +255,6 @@ public class MergeNoticesMojo extends AbstractMojo {
     
     private Plugin createRemoteResourcesPlugin() {
         Plugin plugin = new Plugin();
-        
-        // reuse CXF's notice supplements list for now
-//        Dependency cxfBuildTools = new Dependency();
-//        cxfBuildTools.setGroupId("org.apache.cxf.build-utils");
-//        cxfBuildTools.setArtifactId("cxf-buildtools");
-//        cxfBuildTools.setVersion("2.4.0");
-//        plugin.addDependency(cxfBuildTools);
         
         plugin.setArtifactId("maven-remote-resources-plugin");
         plugin.setVersion("1.2.1");
