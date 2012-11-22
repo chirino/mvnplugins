@@ -203,7 +203,7 @@ public class DependencyPom {
         }
         return false;
     }
-    
+
     private Dependency dependencyFromJar(File jar, File repo) {
         Dependency dep = new Dependency();
         String version = jar.getParentFile().getName();
@@ -216,11 +216,11 @@ public class DependencyPom {
         String fileName = jar.getName();
         int idxOfVersion = fileName.lastIndexOf(version);
         int idxOfLastDot = fileName.lastIndexOf(".");
-        if (idxOfVersion + version.length() < idxOfLastDot) {
+        if (idxOfVersion > 0 && idxOfVersion + version.length() < idxOfLastDot && !fileName.contains("SNAPSHOT")) {
             String classifier = fileName.substring(idxOfVersion + version.length() + 1, idxOfLastDot);
             dep.setClassifier(classifier);
         }        
-        
+
         dep.setArtifactId(artifactId);
         dep.setGroupId(groupId);
         dep.setVersion(version);        
