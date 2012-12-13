@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.26</version>
+    <version>1.28-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
