@@ -91,7 +91,7 @@ public class DependencyPom {
             // hack to go from maven coordinate string to Parent obj. TODO any Maven util class to do this?
             String[] strings = defaultParent.split(":");
             
-            if (strings.length == 3) {            
+            if (strings.length >= 3) {            
                 model.getParent().setGroupId(strings[0]);
                 model.getParent().setArtifactId(strings[1]);        
                 if ("VERSION".equals(strings[2])) {
@@ -99,7 +99,11 @@ public class DependencyPom {
                 } else {
                     model.getParent().setVersion(strings[2]);
                 }        
-                model.getParent().setRelativePath(null);
+                if (strings.length == 4) {
+                    model.getParent().setRelativePath(strings[3]);
+                } else {
+                    model.getParent().setRelativePath(null);
+                }
             }
         }
     }
