@@ -16,25 +16,31 @@
  */
 package org.fusesource.mvnplugins.graph;
 
-import org.apache.maven.shared.dependency.tree.DependencyNode;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.artifact.Artifact;
-import org.codehaus.plexus.util.cli.*;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.codehaus.plexus.util.FileUtils;
+import org.codehaus.plexus.util.cli.CommandLineException;
+import org.codehaus.plexus.util.cli.CommandLineUtils;
+import org.codehaus.plexus.util.cli.Commandline;
+import org.codehaus.plexus.util.cli.DefaultConsumer;
 
-import java.util.*;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.*;
 
 /**
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  */
 public class DependencyVisualizer {
 
-    LinkedHashMap<String, Node> nodes = new LinkedHashMap<String, Node>();
-    LinkedHashSet<Edge> edges = new LinkedHashSet<Edge>();
-    HashSet<String> hideScopes = new HashSet<String>();
+    private static final String DOT_EXTENSION = ".dot";
+    private static final String TGF_EXTENSION = ".tgf";
+
+    private final LinkedHashMap<String, Node> nodes = new LinkedHashMap<String, Node>();
+    private final LinkedHashSet<Edge> edges = new LinkedHashSet<Edge>();
+    final HashSet<String> hideScopes = new HashSet<String>();
     boolean hideOptional;
     boolean hidePoms;
     boolean hideOmitted;
@@ -68,7 +74,7 @@ public class DependencyVisualizer {
 
         @Override
         public boolean equals(Object obj) {
-            return id.equals(((Node) obj).id);
+            return (obj instanceof Node) && id.equals(((Node) obj).id);
         }
 
         @Override
@@ -85,11 +91,7 @@ public class DependencyVisualizer {
             if ( hidePoms && isExclusivelyType("pom") ) {
                 return true;
             }
-            if( hideExternal && roots == 0 ) {
-                return true;
-            }
-            
-            return false;
+            return hideExternal && roots == 0;
         }
 
         public String getId() {
@@ -213,11 +215,11 @@ public class DependencyVisualizer {
     }
 
     private class Edge {
-        private Node parent;
-        private Node child;
+        private final Node parent;
+        private final Node child;
         private String scope;
         private boolean optional;
-        private DependencyNode dependencyNode;
+        private final DependencyNode dependencyNode;
         private String groupId;
         private String artifactId;
 
@@ -556,10 +558,10 @@ public class DependencyVisualizer {
 
         // Write the source file...
         boolean convertDotFile=true;
-        File source = new File(target.getParentFile(), target.getName() + ".dot");
+        File source = new File(target.getParentFile(), target.getName() + DOT_EXTENSION);
 
         // User might just be requesting a dot file..
-        if( target.getName().endsWith(".dot") ) {
+        if( target.getName().endsWith(DOT_EXTENSION) ||  target.getName().endsWith(TGF_EXTENSION) ) {
             convertDotFile = false;
             source = target;
         }
@@ -568,14 +570,18 @@ public class DependencyVisualizer {
         try {
             log.debug("Exporting to: "+source);
             os = new PrintStream(source);
-            DotExporter exporter = new DotExporter(os);
-            exporter.export();
+            if(target.getName().endsWith(TGF_EXTENSION)) {
+                new TgfExporter(os).export();
+            } else {
+                new DotExporter(os).export();
+            }
         } catch (Exception e) {
-            throw new MojoExecutionException("Could not create the dot file used to generate the image.", e);
+            throw new MojoExecutionException("Could not create the dot/tgf file", e);
         } finally {
-            os.close();
+            if(os != null) {
+                os.close();
+            }
         }
-
 
         if (!convertDotFile) {
             return;
@@ -601,13 +607,36 @@ public class DependencyVisualizer {
             }
             log.debug("Graph generated. ");
             if( !keepDot ) {
-                source.delete();
+                if(!source.delete()) {
+                    log.warn("failed to delete generated dot file");
+                }
             }
 
         } catch (CommandLineException e) {
             throw new MojoExecutionException("Execution of the 'dot' command failed.", e);
         }
 
+    }
+
+    private final class TgfExporter {
+        private final PrintStream out;
+
+        public TgfExporter(final PrintStream os) {
+            out = os;
+        }
+
+        public void export() {
+            for (Node node : nodes.values()) {
+                String label =  node.getLabel().replace("\\n", " ");
+                out.printf("%s %s\n", node.getId(), label);
+            }
+
+            out.printf("#\n");
+
+            for (Edge edge : edges) {
+                out.printf("%s %s\n", edge.parent.getId(), edge.child.getId());
+            }
+        }
     }
 
     private class DotExporter {

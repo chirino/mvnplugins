@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.io.File;
 
 /**
- * Generates a graph image of the dependencies of the project using the graphviz
- * tool 'dot'.  You must have the 'dot' executable installed and in your path
- * before using this goal.
+ * Generates a graph image of the dependencies of the project based on graphviz
+ * 'dot' files. Alternatively, generates TGF (trivial graph format) files.
+ * To automatically generate images from dot files, you must have graphviz tools installed.
  * <p/>
  *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
@@ -100,7 +100,7 @@ public class ProjectMojo extends AbstractMojo {
 
     /**
      * The file the diagram will be written to.  Must use a file extension that the dot command supports or just the
-     * '.dot' extension.
+     * '.dot' or '.tgf' extension.
      * <br/>
      * @parameter default-value="${project.build.directory}/project-graph.png" expression="${graph.target}"
      */
@@ -263,7 +263,7 @@ public class ProjectMojo extends AbstractMojo {
 
             if (hideScopes != null) {
                 for (String scope : hideScopes.split(",")) {
-                    visualizer.hideScopes.add(scope.trim());
+                    visualizer.hideScopes.add(scope);
                 }
             }
             
@@ -304,7 +304,7 @@ public class ProjectMojo extends AbstractMojo {
             visualizer.export(getTarget());
             getLog().info("Dependency graph exported to: " + getTarget());
         } catch (DependencyTreeBuilderException e) {
-            throw new MojoExecutionException("Could not build the depedency tree.", e);
+            throw new MojoExecutionException("Could not build the dependency tree.", e);
         }
     }
 
