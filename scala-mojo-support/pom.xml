@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.30</version>
+    <version>1.31-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>scala-mojo-support</artifactId>
-  <version>1.30</version>
+  <version>1.31-SNAPSHOT</version>
 
   <packaging>jar</packaging>
   
