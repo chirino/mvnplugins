@@ -190,7 +190,7 @@ public class MergeNoticesMojo extends AbstractMojo {
     private Plugin createShadePlugin() {
         Plugin shade = new Plugin();
         shade.setArtifactId("maven-shade-plugin");
-        shade.setVersion("2.0");
+        shade.setVersion("2.2");
         PluginExecution pluginExecution = new PluginExecution();
         pluginExecution.addGoal("shade");
         pluginExecution.setPhase("package");
