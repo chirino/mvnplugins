@@ -115,8 +115,11 @@ public class DependencyPom {
     public void generatePom(String repositories, String targetDir) throws IOException {
         List<Dependency> loadDependenciesFromRepos = loadDependenciesFromRepos(repositories);
         loadDependenciesFromRepos.addAll(extraDependencies);
-        model.setDependencies(loadDependenciesFromRepos);        
-        
+        model.setDependencies(loadDependenciesFromRepos);
+
+        project.getProperties().put("skipTests", "true");
+        model.setProperties(project.getProperties());
+
         file = new File(targetDir, "dependency-pom.xml");
         if (file.exists()) {
             file.delete();
@@ -124,7 +127,7 @@ public class DependencyPom {
         ModelWriter writer = new DefaultModelWriter();
         writer.write(file, null, model);
     }
-    
+
     public File buildPom() throws MavenInvocationException {
         if (file != null) {
             InvocationRequest request = new DefaultInvocationRequest();
@@ -133,8 +136,6 @@ public class DependencyPom {
             request.setLocalRepositoryDirectory(new File(localRepository.getBasedir()));
             request.setGoals(Collections.singletonList("package"));
             request.setProfiles(project.getActiveProfiles());
-            project.getProperties().put("skipTests", "true");
-            request.setProperties(project.getProperties());
             request.setShellEnvironmentInherited(true);
             if (session.getRequest().getUserSettingsFile().exists()) {
                 request.setUserSettingsFile(session.getRequest().getUserSettingsFile());
