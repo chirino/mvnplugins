@@ -228,17 +228,11 @@
     <plugins>
 
       <!-- to allow us to use Git repositories -->
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-scm-plugin</artifactId>
         <version>1.5</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.scm</groupId>
-            <artifactId>maven-scm-provider-gitexe</artifactId>
-            <version>1.5</version>
-          </dependency>
-        </dependencies>
       </plugin>
         
       <!-- Since site generation is not supported well /w Maven 3 yet -->
