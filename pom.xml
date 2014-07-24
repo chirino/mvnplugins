@@ -45,6 +45,7 @@
     <module>maven-fab-plugin</module>
     <module>maven-notices-plugin</module>
     <module>maven-consolets-plugin</module>
+    <module>maven-bundle-summary-plugin</module>
   </modules>
 
   <properties>
