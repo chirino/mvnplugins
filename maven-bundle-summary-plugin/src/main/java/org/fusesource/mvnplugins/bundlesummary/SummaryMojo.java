@@ -20,12 +20,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -96,8 +98,9 @@ public class SummaryMojo extends AbstractMojo {
                 getLog().info("No file for artifact " + artifact.getArtifactId());
                 continue;
             }
+            JarFile jar = null;
             try {
-                JarFile jar = new JarFile(bundle);
+                jar = new JarFile(bundle);
                 Manifest m = jar.getManifest();
                 if (m == null || m.getMainAttributes() == null) {
                     continue;
@@ -111,6 +114,8 @@ public class SummaryMojo extends AbstractMojo {
                 String version = mainAttributes.getValue("Bundle-Version");
                 String exportsInfo = mainAttributes.getValue("Export-Package");
                 String importsInfo = mainAttributes.getValue("Import-Package");
+                String reqs = mainAttributes.getValue("Require-Capability");
+                String provides = mainAttributes.getValue("Provide-Capability");
 
                 String key = String.format("%s:%s", symbolicName, version);
                 BundleMetadata metadata = new BundleMetadata();
@@ -119,6 +124,7 @@ public class SummaryMojo extends AbstractMojo {
                 metadata.setSymbolicName(symbolicName);
                 metadata.setVersion(version);
 
+                // Import-Package
                 Parameters importParameters = OSGiHeader.parseHeader(importsInfo);
                 for (String packageName: importParameters.keySet()) {
                     String packageVersion = importParameters.get(packageName).getVersion();
@@ -136,6 +142,8 @@ public class SummaryMojo extends AbstractMojo {
                     }
                     imports.get(packageName).get(packageVersion).add(metadata);
                 }
+
+                // Export-Package
                 Parameters exportParameters = OSGiHeader.parseHeader(exportsInfo);
                 for (String packageName: exportParameters.keySet()) {
                     String packageVersion = exportParameters.get(packageName).getVersion();
@@ -153,8 +161,44 @@ public class SummaryMojo extends AbstractMojo {
                     }
                     exports.get(packageName).get(packageVersion).add(metadata);
                 }
+
+                // private packages - all found packages, which are not exported
+                for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements(); ) {
+                    JarEntry entry = e.nextElement();
+                    if (entry.getName() != null && entry.getName().endsWith(".class")) {
+                        String packageName = entry.getName().substring(0, entry.getName().lastIndexOf("/"));
+                        packageName = packageName.replaceAll("/", ".");
+                        if (!exports.containsKey(packageName)) {
+                            metadata.getPrivatePackages().add(packageName);
+                        }
+                    }
+                }
+
+                // Provide-Capability/Require-Capability
+                Parameters reqsParameters = OSGiHeader.parseHeader(reqs);
+                for (String capabilityName: reqsParameters.keySet()) {
+                    Capability capability = new Capability(capabilityName);
+                    capability.setOtherAttributes(exportParameters.get(capabilityName));
+                    metadata.getRequiredCapabilities().add(capability);
+                    // TODO: report on matching reqs/provides to resolve conflicts
+                }
+                Parameters providesParameters = OSGiHeader.parseHeader(provides);
+                for (String capabilityName: providesParameters.keySet()) {
+                    Capability capability = new Capability(capabilityName);
+                    capability.setOtherAttributes(exportParameters.get(capabilityName));
+                    metadata.getProvidedCapabilities().add(capability);
+                    // TODO: report on matching reqs/provides to resolve conflicts
+                }
             } catch (IOException e) {
                 throw new MojoExecutionException(e.getMessage(), e);
+            } finally {
+                if (jar != null) {
+                    try {
+                        jar.close();
+                    } catch (IOException e) {
+                        throw new MojoExecutionException(e.getMessage(), e);
+                    }
+                }
             }
         }
 
@@ -182,6 +226,21 @@ public class SummaryMojo extends AbstractMojo {
                     writer.write("                <export package=\"" + pe.getPackageName() + "\" version=\"" + pe.getVersion() + "\" />\n");
                 }
                 writer.write("            </exports>\n");
+                writer.write("            <privates>\n");
+                for (String p : bm.getPrivatePackages()) {
+                    writer.write("                <private package=\"" + p + "\" />\n");
+                }
+                writer.write("            </privates>\n");
+                writer.write("            <provided-capabilities>\n");
+                for (Capability c : bm.getProvidedCapabilities()) {
+                    writer.write("                <capability name=\"" + c.getName() + "\" />\n");
+                }
+                writer.write("            </provided-capabilities>\n");
+                writer.write("            <required-capabilities>\n");
+                for (Capability c : bm.getRequiredCapabilities()) {
+                    writer.write("                <capability name=\"" + c.getName() + "\" />\n");
+                }
+                writer.write("            </required-capabilities>\n");
                 writer.write("        </bundle>\n");
             }
             writer.write("    </bundles>\n");

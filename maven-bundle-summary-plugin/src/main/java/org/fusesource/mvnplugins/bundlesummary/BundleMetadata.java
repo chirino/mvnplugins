@@ -27,6 +27,9 @@ public class BundleMetadata implements Comparable<BundleMetadata> {
     private String version;
     private List<PackageImport> imports = new LinkedList<PackageImport>();
     private List<PackageExport> exports = new LinkedList<PackageExport>();
+    private List<String> privatePackages = new LinkedList<String>();
+    private List<Capability> requiredCapabilities = new LinkedList<Capability>();
+    private List<Capability> providedCapabilities = new LinkedList<Capability>();
 
     @Override
     public boolean equals(Object o) {
@@ -45,7 +48,6 @@ public class BundleMetadata implements Comparable<BundleMetadata> {
         return result;
     }
 
-    @Override
     public int compareTo(BundleMetadata o) {
         int r1 = this.symbolicName.compareTo(o.symbolicName);
         return r1 == 0 ? this.version.compareTo(o.version) : r1;
@@ -73,6 +75,18 @@ public class BundleMetadata implements Comparable<BundleMetadata> {
 
     public List<PackageExport> getExports() {
         return exports;
+    }
+
+    public List<String> getPrivatePackages() {
+        return privatePackages;
+    }
+
+    public List<Capability> getRequiredCapabilities() {
+        return requiredCapabilities;
+    }
+
+    public List<Capability> getProvidedCapabilities() {
+        return providedCapabilities;
     }
 
 }
