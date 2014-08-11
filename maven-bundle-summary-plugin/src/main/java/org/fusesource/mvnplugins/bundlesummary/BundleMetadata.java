@@ -17,6 +17,8 @@ package org.fusesource.mvnplugins.bundlesummary;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Essential information from bundle MANIFEST.MF file
@@ -27,7 +29,7 @@ public class BundleMetadata implements Comparable<BundleMetadata> {
     private String version;
     private List<PackageImport> imports = new LinkedList<PackageImport>();
     private List<PackageExport> exports = new LinkedList<PackageExport>();
-    private List<String> privatePackages = new LinkedList<String>();
+    private Set<String> privatePackages = new TreeSet<String>();
     private List<Capability> requiredCapabilities = new LinkedList<Capability>();
     private List<Capability> providedCapabilities = new LinkedList<Capability>();
 
@@ -77,7 +79,7 @@ public class BundleMetadata implements Comparable<BundleMetadata> {
         return exports;
     }
 
-    public List<String> getPrivatePackages() {
+    public Set<String> getPrivatePackages() {
         return privatePackages;
     }
 

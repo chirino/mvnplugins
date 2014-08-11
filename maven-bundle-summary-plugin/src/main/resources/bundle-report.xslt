@@ -165,7 +165,7 @@
                             </table>
                         </td>
                     </tr>
-                    <tr>
+                    <!--tr>
                         <td style="vertical-align: top">
                             <p class="bg-info">required capabilities</p>
                             <table class="table table-condensed">
@@ -207,7 +207,7 @@
                             </table>
                         </td>
                         <td></td>
-                    </tr>
+                    </tr-->
                 </tbody>
             </table>
         </div>
