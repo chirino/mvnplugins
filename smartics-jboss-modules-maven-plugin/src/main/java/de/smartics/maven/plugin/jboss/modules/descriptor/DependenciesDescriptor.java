@@ -17,6 +17,7 @@ package de.smartics.maven.plugin.jboss.modules.descriptor;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * Stores information about a matcher on modules to apply dependency information
@@ -441,7 +442,7 @@ public final class DependenciesDescriptor
   @Override
   public String toString()
   {
-    return ToStringBuilder.reflectionToString(this);
+      return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE, false, null);
   }
 
 }
