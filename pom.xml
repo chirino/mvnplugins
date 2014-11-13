@@ -46,6 +46,7 @@
     <module>maven-notices-plugin</module>
     <module>maven-consolets-plugin</module>
     <module>maven-bundle-summary-plugin</module>
+    <module>smartics-jboss-modules-maven-plugin</module>
   </modules>
 
   <properties>

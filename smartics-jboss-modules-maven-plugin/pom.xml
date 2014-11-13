@@ -4,14 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>de.smartics.config.pom</groupId>
-    <artifactId>pom-java</artifactId>
-    <version>33.0.1</version>
+    <groupId>org.fusesource.mvnplugins</groupId>
+    <artifactId>mvnplugins</artifactId>
+    <version>1.35-SNAPSHOT</version>
   </parent>
 
-  <groupId>de.smartics.maven.plugin</groupId>
+  <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>smartics-jboss-modules-maven-plugin</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.35-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>${project.artifactId}</name>
@@ -39,20 +39,6 @@
     </contributor>
   </contributors>
 
-  <scm>
-    <connection>scm:svn:https://www.smartics.eu/svn/public/maven/smartics-jboss-modules-maven-plugin/trunk</connection>
-    <developerConnection>scm:svn:https://www.smartics.eu/svn/public/maven/smartics-jboss-modules-maven-plugin/trunk</developerConnection>
-    <url>https://www.smartics.eu/svn/public/maven/smartics-jboss-modules-maven-plugin/trunk</url>
-  </scm>
-
-  <distributionManagement>
-    <site>
-      <id>${project-visibility}-site</id>
-      <name>documentation site</name>
-      <url>${site.root}/${project.groupId}/${project.artifactId}/${project.version}</url>
-    </site>
-  </distributionManagement>
-
   <properties>
     <issues-product>${project.artifactId}</issues-product>
     <issues-component />
@@ -67,7 +53,6 @@
     <aether.version>0.9.0.M2</aether.version>
 
     <smartics-commons.version>0.5.2</smartics-commons.version>
-
     <testdoc.version>0.4.1</testdoc.version>
   </properties>
 
