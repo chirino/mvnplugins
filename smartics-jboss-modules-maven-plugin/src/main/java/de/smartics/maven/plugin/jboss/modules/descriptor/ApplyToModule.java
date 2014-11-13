@@ -15,10 +15,7 @@
  */
 package de.smartics.maven.plugin.jboss.modules.descriptor;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -61,6 +58,8 @@ public final class ApplyToModule
    */
   private String exportsXml;
 
+  private final List<String> resourceRootsXml;
+
   // ****************************** Initializer *******************************
 
   // ****************************** Constructors ******************************
@@ -71,6 +70,7 @@ public final class ApplyToModule
     propertiesXml = builder.propertiesXml;
     dependenciesXml = builder.dependenciesXml;
     exportsXml = builder.exportsXml;
+    resourceRootsXml = builder.resourceRootsXml;
   }
 
   // ****************************** Inner Classes *****************************
@@ -112,6 +112,7 @@ public final class ApplyToModule
      * The exports information as XML fragment.
      */
     private String exportsXml;
+    private final List<String> resourceRootsXml = new LinkedList<String>();
 
     // ***************************** Initializer ******************************
 
@@ -148,6 +149,15 @@ public final class ApplyToModule
       // TODO: Warn if element is already stored?
       propertiesXml.put(name, fragment);
     }
+
+    public void addResourceRootXml(final String value)
+    {
+      // TODO: Warn if element is already stored?
+        if( !resourceRootsXml.contains(value) ) {
+            resourceRootsXml.add(value);
+        }
+    }
+
 
     /**
      * Adds the given module dependency.
@@ -226,6 +236,11 @@ public final class ApplyToModule
     return new ArrayList<String>(dependenciesXml.values());
   }
 
+  public List<String> getResourceRootsXml()
+  {
+    return new ArrayList<String>(resourceRootsXml);
+  }
+
   /**
    * Returns the exports XML fragment.
    *
@@ -247,8 +262,18 @@ public final class ApplyToModule
   {
     mergeMainClass(applyToModule);
     mergeExports(applyToModule);
+    mergeResourceRootsXML(applyToModule);
+
     merge("properties", propertiesXml, applyToModule.propertiesXml);
     merge("dependencies", dependenciesXml, applyToModule.dependenciesXml);
+  }
+
+  private void mergeResourceRootsXML(ApplyToModule applyToModule) {
+      for (String value : new ArrayList<String>(applyToModule.resourceRootsXml)) {
+          if( !this.resourceRootsXml.contains(value) ) {
+              this.resourceRootsXml.add(value);
+          }
+      }
   }
 
   private void mergeMainClass(final ApplyToModule applyToModule)

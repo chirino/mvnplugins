@@ -331,6 +331,11 @@ final class ModulesDescriptorBuilderV2
       final String fragment = outputter.outputString(child);
       mBuilder.withMainClassXml(fragment);
     }
+    else if ("resource-root".equals(elementName))
+    {
+      final String fragment = outputter.outputString(child);
+      mBuilder.addResourceRootXml(fragment);
+    }
     else
     {
       // TODO warn or add to end?
