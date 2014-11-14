@@ -413,31 +413,38 @@
         </plugins>
       </build>
     </profile>
+    <profiles>
+    
+    <!-- enables extra repositories which may have some
+         goodies that have not reached central yet -->
+    <profile>
+      <id>download</id>
+
+        <repositories>
+          <repository>
+            <id>smartics</id>
+            <url>http://www.smartics.eu/nexus/content/groups/public-group</url>
+            <releases>
+              <enabled>true</enabled>
+            </releases>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+          </repository>
+        </repositories>
+        <pluginRepositories>
+          <pluginRepository>
+            <id>smartics</id>
+            <url>http://www.smartics.eu/nexus/content/groups/public-group</url>
+            <releases>
+              <enabled>true</enabled>
+            </releases>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+          </pluginRepository>
+        </pluginRepositories>
+    
+    </profile>
   </profiles>
-  
-    <repositories>
-      <repository>
-        <id>smartics</id>
-        <url>http://www.smartics.eu/nexus/content/groups/public-group</url>
-        <releases>
-          <enabled>true</enabled>
-        </releases>
-        <snapshots>
-          <enabled>false</enabled>
-        </snapshots>
-      </repository>
-    </repositories>
-    <pluginRepositories>
-      <pluginRepository>
-        <id>smartics</id>
-        <url>http://www.smartics.eu/nexus/content/groups/public-group</url>
-        <releases>
-          <enabled>true</enabled>
-        </releases>
-        <snapshots>
-          <enabled>false</enabled>
-        </snapshots>
-      </pluginRepository>
-    </pluginRepositories>
-      
 </project>
