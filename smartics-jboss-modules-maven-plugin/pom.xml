@@ -413,7 +413,6 @@
         </plugins>
       </build>
     </profile>
-    <profiles>
     
     <!-- enables extra repositories which may have some
          goodies that have not reached central yet -->
