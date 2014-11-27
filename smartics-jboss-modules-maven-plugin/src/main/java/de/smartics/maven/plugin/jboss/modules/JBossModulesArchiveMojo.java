@@ -249,6 +249,10 @@ public final class JBossModulesArchiveMojo extends AbstractMojo
    * be named prodx1.</td>
    * </tr>
    * <tr>
+   * <td>version-full</td>
+   * <td>The slot has the full number of the version. (ex. 1.2.0) </td>
+   * </tr>
+   * <tr>
    * <td>main</td>
    * <td>The slot has the name as given with <code>defaultSlot</code>.</td>
    * </tr>

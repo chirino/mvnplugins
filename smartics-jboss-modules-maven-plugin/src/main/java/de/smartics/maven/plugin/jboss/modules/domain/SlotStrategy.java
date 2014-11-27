@@ -41,8 +41,14 @@ public enum SlotStrategy
   /**
    * The module is set to the major artifact version slot.
    */
-  VERSION_MAJOR("version-major");
+  VERSION_MAJOR("version-major"),
 
+  /**
+   * The module is set to the full artifact version slot
+   */
+
+  VERSION_FULL("version-full");
+  
   /**
    * The main slot.
    */
@@ -112,10 +118,10 @@ public enum SlotStrategy
    */
   public String calcSlot(final Artifact artifact, final String defaultSlot)
   {
+	final String versionString = calcVersion(artifact);
+	final ArtifactVersion version = new DefaultArtifactVersion(versionString);
     if (this == VERSION_MAJOR)
     {
-      final String versionString = calcVersion(artifact);
-      final ArtifactVersion version = new DefaultArtifactVersion(versionString);
       final int majorVersion = version.getMajorVersion();
       final String slot;
       if (!(StringUtils.isBlank(defaultSlot) || MAIN_SLOT.equals(defaultSlot)))
@@ -125,6 +131,17 @@ public enum SlotStrategy
       else
       {
         slot = String.valueOf(majorVersion);
+      }
+      return slot;
+    } else if (this == VERSION_FULL)
+    {
+      final int majorVersion = version.getMajorVersion();
+      final int minorVersion = version.getMinorVersion();
+      final int incrementalVersion = version.getIncrementalVersion();
+      String slot = String.valueOf(majorVersion) + "." + String.valueOf(minorVersion) + "." + String.valueOf(incrementalVersion);
+      if (!(StringUtils.isBlank(defaultSlot) || MAIN_SLOT.equals(defaultSlot)))
+      {
+        slot = defaultSlot + slot;
       }
       return slot;
     }
