@@ -351,6 +351,14 @@ public final class JBossModulesArchiveMojo extends AbstractMojo
   @Parameter(defaultValue = "false")
   private boolean excludeDependencyManagementDependenciesInPomProject;
 
+
+  /**
+   * Exclude any dependencies or transitive dependencies that are marked as
+   * optional = true.
+   */
+  @Parameter(defaultValue = "false")
+  private boolean ignoreOptionalDependencies;
+
   // ****************************** Initializer *******************************
 
   // ****************************** Constructors ******************************
@@ -585,6 +593,7 @@ public final class JBossModulesArchiveMojo extends AbstractMojo
 
     final ModuleMap moduleMap = new ModuleMap(allModules, dependencies);
     builder.with(moduleMap);
+    builder.with(ignoreOptionalDependencies);
 
     if (verbose)
     {
