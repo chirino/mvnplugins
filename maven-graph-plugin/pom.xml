@@ -21,13 +21,13 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.37-SNAPSHOT</version>
+    <version>1.38-SNAPSHOT</version>
   </parent>
   
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>maven-graph-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.37-SNAPSHOT</version>
+  <version>1.38-SNAPSHOT</version>
   
   <name>Maven Graph Plugin</name>
   <description>Creates a dependency graph of your project using graphvis</description>
