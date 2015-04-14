@@ -17,12 +17,8 @@ package de.smartics.maven.plugin.jboss.modules;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
@@ -404,6 +400,17 @@ public final class JBossModulesArchiveMojo extends AbstractMojo
     {
       modules.addAll(descriptor.getDescriptors());
     }
+
+    // Make sure the module order stays consistent across all platforms
+    Collections.sort(modules, new Comparator<ModuleDescriptor>()
+    {
+      @Override
+      public int compare(final ModuleDescriptor o1, final ModuleDescriptor o2)
+      {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
+
     return modules;
   }
 
