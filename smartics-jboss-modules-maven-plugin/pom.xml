@@ -47,10 +47,10 @@
     <ohlohProjectId>710977</ohlohProjectId>
     <twitterId>smartics</twitterId>
 
-    <maven.version>3.1.0</maven.version>
+    <maven.version>3.2.5</maven.version>
     <maven.project.version>2.2.1</maven.project.version>
     <maven-plugin-plugin.version>3.2</maven-plugin-plugin.version>
-    <aether.version>0.9.0.M2</aether.version>
+    <aether.version>1.0.0.v20140518</aether.version>
 
     <smartics-commons.version>0.5.2</smartics-commons.version>
     <testdoc.version>0.4.1</testdoc.version>
@@ -121,12 +121,7 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.aether</groupId>
-      <artifactId>aether-connector-wagon</artifactId>
-      <version>${aether.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.aether</groupId>
-      <artifactId>aether-connector-file</artifactId>
+      <artifactId>aether-transport-wagon</artifactId>
       <version>${aether.version}</version>
     </dependency>
     <dependency>
