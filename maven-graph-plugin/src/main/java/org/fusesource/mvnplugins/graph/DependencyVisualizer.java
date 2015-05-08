@@ -24,6 +24,7 @@ import org.codehaus.plexus.util.cli.*;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.io.File;
 import java.io.PrintStream;
 
@@ -48,6 +49,10 @@ public class DependencyVisualizer {
     Log log;
     boolean cascade;
     String direction="TB";
+    Pattern excludeGroupIds;
+    Pattern includeGroupIds;
+    Pattern excludeArtifactIds;
+    Pattern includeArtifactIds;
     
     Set<String> excludeGroupIds = new HashSet<String>();
     Set<String> includeGroupIds = new HashSet<String>();
@@ -87,6 +92,20 @@ public class DependencyVisualizer {
             if( hideExternal && roots == 0 ) {
                 return true;
             }
+            
+            if( excludeGroupIds != null && excludeGroupIds.matcher(artifact.getGroupId()).matches() ) {
+            	return true;
+            }
+            if( includeGroupIds != null && !includeGroupIds.matcher(artifact.getGroupId()).matches() ) {
+            	return true;
+            }
+            if( excludeArtifactIds != null && excludeArtifactIds.matcher(artifact.getArtifactId()).matches() ) {
+            	return true;
+            }
+            if( includeArtifactIds != null && !includeArtifactIds.matcher(artifact.getArtifactId()).matches() ) {
+            	return true;
+            }
+            
             return false;
         }
 
@@ -399,7 +418,7 @@ public class DependencyVisualizer {
         }
         if (dn.hasChildren()) {
             for (DependencyNode c : (List<DependencyNode>) dn.getChildren()) {
-               Node child = add(c, false);
+                Node child = add(c, false);
                 Edge edge = new Edge(parent, child, c);
                 add(edge);
             }

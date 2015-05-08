@@ -30,6 +30,7 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.io.File;
 
 /**
@@ -166,7 +167,7 @@ public class ProjectMojo extends AbstractMojo {
      * @parameter default-value="false" expression="${hide-group-id}"
      */
     protected boolean hideGroupId;
-    
+
     /**
      * A comma separated list of group Ids to include. If this parameter
      * is specified, any group Id not matching will  be excluded.
@@ -215,6 +216,30 @@ public class ProjectMojo extends AbstractMojo {
     protected boolean cascade;
 
     /**
+     * A regex pattern that will be applied to exclude the given group ids.
+     * @parameter expression="${exclude-groupIds}"
+     */
+    protected String excludeGroupIds;
+
+    /**
+     * A regex pattern that will be applied to include only the given group ids.
+     * @parameter expression="${include-groupIds}"
+     */
+    protected String includeGroupIds;
+
+    /**
+     * A regex pattern that will be applied to exclude the given artifact ids.
+     * @parameter expression="${exclude-artifactIds}"
+     */
+    protected String excludeArtifactIds;
+
+    /**
+     * A regex pattern that will be applied to include only the given artifact ids.
+     * @parameter expression="${include-artifactIds}"
+     */
+    protected String includeArtifactIds;
+
+    /**
      * The direction that the graph will be laid out in.
      * it can be one of the following values:
      * <br/>
@@ -260,6 +285,19 @@ public class ProjectMojo extends AbstractMojo {
                for (String groupId : includeGroupIds.split(",")) {
                   visualizer.includeGroupIds.add(groupId.trim());
                }
+            }
+            
+            if( excludeGroupIds != null ) {
+            	visualizer.excludeGroupIds = Pattern.compile(excludeGroupIds);
+            }
+            if( includeGroupIds != null ) {
+            	visualizer.includeGroupIds = Pattern.compile(includeGroupIds);
+            }
+            if( excludeArtifactIds != null ) {
+            	visualizer.excludeArtifactIds = Pattern.compile(excludeArtifactIds);
+            }
+            if( includeArtifactIds != null ) {
+            	visualizer.includeArtifactIds = Pattern.compile(includeArtifactIds);
             }
 
             ArrayList<MavenProject> projects = new ArrayList<MavenProject>();
