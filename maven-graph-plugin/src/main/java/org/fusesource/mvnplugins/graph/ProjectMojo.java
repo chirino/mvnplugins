@@ -30,7 +30,6 @@ import org.apache.maven.shared.dependency.tree.DependencyTreeBuilderException;
 import org.apache.maven.shared.dependency.tree.DependencyNode;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 import java.io.File;
 
 /**
@@ -186,6 +185,23 @@ public class ProjectMojo extends AbstractMojo {
     protected String excludeGroupIds;
 
     /**
+     * A comma separated list of artifact Ids to include. If this parameter
+     * is specified, any artifact Id not matching will  be excluded.
+     * A '*' can be appended <b>only</b> at the end to match subgroups<br/>
+     * For example: <code>commons-*</code>
+     * @parameter expression="${include-artifact-ids}"
+     */
+    protected String includeArtifactIds;
+    
+    /**
+     * A comma separated list of artifact Ids to exclude. A '*' can be appended
+     * <b>only</b> at the end to match subgroups<br/>
+     * For example: <code>commons-*</code>
+     * @parameter expression="${exclude-artifact-ids}"
+     */
+    protected String excludeArtifactIds;
+
+    /**
      * If set to true then the module type label will not be drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-type}"
@@ -214,30 +230,6 @@ public class ProjectMojo extends AbstractMojo {
      * @parameter default-value="true" expression="${graph.cascade}"
      */
     protected boolean cascade;
-
-    /**
-     * A regex pattern that will be applied to exclude the given group ids.
-     * @parameter expression="${exclude-groupIds}"
-     */
-    protected String excludeGroupIds;
-
-    /**
-     * A regex pattern that will be applied to include only the given group ids.
-     * @parameter expression="${include-groupIds}"
-     */
-    protected String includeGroupIds;
-
-    /**
-     * A regex pattern that will be applied to exclude the given artifact ids.
-     * @parameter expression="${exclude-artifactIds}"
-     */
-    protected String excludeArtifactIds;
-
-    /**
-     * A regex pattern that will be applied to include only the given artifact ids.
-     * @parameter expression="${include-artifactIds}"
-     */
-    protected String includeArtifactIds;
 
     /**
      * The direction that the graph will be laid out in.
@@ -287,19 +279,18 @@ public class ProjectMojo extends AbstractMojo {
                }
             }
             
-            if( excludeGroupIds != null ) {
-            	visualizer.excludeGroupIds = Pattern.compile(excludeGroupIds);
+            if (excludeArtifactIds != null) {
+               for (String artifactId : excludeArtifactIds.split(",")) {
+                  visualizer.excludeArtifactIds.add(artifactId.trim());
+               }
             }
-            if( includeGroupIds != null ) {
-            	visualizer.includeGroupIds = Pattern.compile(includeGroupIds);
+            
+            if (includeArtifactIds != null) {
+               for (String artifactId : includeArtifactIds.split(",")) {
+                  visualizer.includeArtifactIds.add(artifactId.trim());
+               }
             }
-            if( excludeArtifactIds != null ) {
-            	visualizer.excludeArtifactIds = Pattern.compile(excludeArtifactIds);
-            }
-            if( includeArtifactIds != null ) {
-            	visualizer.includeArtifactIds = Pattern.compile(includeArtifactIds);
-            }
-
+            
             ArrayList<MavenProject> projects = new ArrayList<MavenProject>();
             collectProjects(projects);
 

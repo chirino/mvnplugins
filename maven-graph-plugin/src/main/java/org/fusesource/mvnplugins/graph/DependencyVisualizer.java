@@ -24,7 +24,6 @@ import org.codehaus.plexus.util.cli.*;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.io.File;
 import java.io.PrintStream;
 
@@ -49,15 +48,12 @@ public class DependencyVisualizer {
     Log log;
     boolean cascade;
     String direction="TB";
-    Pattern excludeGroupIds;
-    Pattern includeGroupIds;
-    Pattern excludeArtifactIds;
-    Pattern includeArtifactIds;
     
     Set<String> excludeGroupIds = new HashSet<String>();
     Set<String> includeGroupIds = new HashSet<String>();
+    Set<String> excludeArtifactIds = new HashSet<String>();
+    Set<String> includeArtifactIds = new HashSet<String>();
     
-
     private class Node {
         private final String id;
         private final ArrayList<Edge> children = new ArrayList<Edge>();
@@ -91,19 +87,6 @@ public class DependencyVisualizer {
             }
             if( hideExternal && roots == 0 ) {
                 return true;
-            }
-            
-            if( excludeGroupIds != null && excludeGroupIds.matcher(artifact.getGroupId()).matches() ) {
-            	return true;
-            }
-            if( includeGroupIds != null && !includeGroupIds.matcher(artifact.getGroupId()).matches() ) {
-            	return true;
-            }
-            if( excludeArtifactIds != null && excludeArtifactIds.matcher(artifact.getArtifactId()).matches() ) {
-            	return true;
-            }
-            if( includeArtifactIds != null && !includeArtifactIds.matcher(artifact.getArtifactId()).matches() ) {
-            	return true;
             }
             
             return false;
@@ -285,7 +268,7 @@ public class DependencyVisualizer {
             for (String exclude : excludeGroupIds) {
                if (exclude.endsWith("*")) {
                   //wildcard match
-                  String prefix = exclude.substring(0, exclude.length()-2); //remove ".*"
+                  String prefix = exclude.substring(0, exclude.length() - 1); // remove "*"
                   if (groupId.startsWith(prefix)) {
                      log.debug("Excluding (wildcard) " + groupId + ":" + artifactId);
                      return true;
@@ -299,25 +282,66 @@ public class DependencyVisualizer {
                }
             }
             
+            boolean included = false;
             for (String include : includeGroupIds) {
                if (include.endsWith("*")) {
                   //wildcard match
-                  String prefix = include.substring(0, include.length()-2); //remove ".*"
+                  String prefix = include.substring(0, include.length() - 1); // remove "*"
                   if (groupId.startsWith(prefix)) {
                      log.debug("Including (wildcard) " + groupId + ":" + artifactId);
-                     return false;
+                     included = true;
                   }
                } else {
                   //exact match
                   if (groupId.equals(include)) {
                      log.debug("Including " + groupId + ":" + artifactId);
-                     return false;
+                     included = true;
                   }
                }
-               return true; //if there is an include, exclude everything not included
+            }
+            // if there is an include, exclude everything not included
+            if (!includeGroupIds.isEmpty() && !included) {
+               return true;
             }
             
-            
+            for (String exclude : excludeArtifactIds) {
+                if (exclude.endsWith("*")) {
+                    //wildcard match
+                    String prefix = exclude.substring(0, exclude.length()-1); //remove "*"
+                    if (artifactId.startsWith(prefix)) {
+                        log.debug("Excluding artifactId (wildcard) " + groupId + ":" + artifactId);
+                        return true;
+                    }
+                } else {
+                    //exact match
+                    if (artifactId.equals(exclude)) {
+                        log.debug("Excluding artifactId " + groupId + ":" + artifactId);
+                        return true;
+                    }
+                }
+            }
+
+            included = false;
+            for (String include : includeArtifactIds) {
+                if (include.endsWith("*")) {
+                    //wildcard match
+                    String prefix = include.substring(0, include.length() - 1); // remove "*"
+                    if (artifactId.startsWith(prefix)) {
+                        log.debug("Including artifactId (wildcard) " + groupId + ":" + artifactId);
+                        included = true;
+                    }
+                } else {
+                    //exact match
+                    if (artifactId.equals(include)) {
+                        log.debug("Including artifactId " + groupId + ":" + artifactId);
+                        included = true;
+                    }
+                }
+            }
+            // if there is an include, exclude everything not included
+            if (!includeArtifactIds.isEmpty() && !included) {
+                return true;
+            }
             
             final int state = dependencyNode.getState();
             if(hideOmitted && (state==DependencyNode.OMITTED_FOR_CONFLICT || state==DependencyNode.OMITTED_FOR_CYCLE) ) {
@@ -595,7 +619,7 @@ public class DependencyVisualizer {
         }
 
         public void export() {
-        	
+            
             String graphFont = "Serif";
             String nodeFont = "SanSerif";
             
@@ -604,7 +628,7 @@ public class DependencyVisualizer {
                 graphFont = "arial";
                 nodeFont = "arial";
             }
-        	
+            
             p("digraph dependencies {").i(1);
             {
                 p("graph [").i(1);
