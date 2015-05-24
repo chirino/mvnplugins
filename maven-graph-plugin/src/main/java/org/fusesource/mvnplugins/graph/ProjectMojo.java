@@ -263,7 +263,7 @@ public class ProjectMojo extends AbstractMojo {
 
             if (hideScopes != null) {
                 for (String scope : hideScopes.split(",")) {
-                    visualizer.hideScopes.add(scope);
+                    visualizer.hideScopes.add(scope.trim());
                 }
             }
             
