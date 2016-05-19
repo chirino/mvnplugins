@@ -94,9 +94,6 @@ public class ProjectReportMojo extends ProjectMojo implements MavenReport {
     public void generate(Sink sink, Locale locale) throws MavenReportException {
         try {
             getLog().info(project.getModules().toString() );
-            if( project.getModules().size() > 1 && reactorProjects != null ) {
-                hideExternal = true;
-            }
             execute();
             
             sink.figure();

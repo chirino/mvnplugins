@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.io.File;
 
 /**
- * Generates a graph image of the dependencies of the project using the graphviz
- * tool 'dot'.  You must have the 'dot' executable installed and in your path
- * before using this goal.
+ * Generates a graph image of the dependencies of the project based on graphviz
+ * 'dot' files. Alternatively, generates TGF (trivial graph format) files.
+ * To automatically generate images from dot files, you must have graphviz tools installed.
  * <p/>
  *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
@@ -100,7 +100,7 @@ public class ProjectMojo extends AbstractMojo {
 
     /**
      * The file the diagram will be written to.  Must use a file extension that the dot command supports or just the
-     * '.dot' extension.
+     * '.dot' or '.tgf' extension.
      * <br/>
      * @parameter default-value="${project.build.directory}/project-graph.png" expression="${graph.target}"
      */
@@ -168,6 +168,40 @@ public class ProjectMojo extends AbstractMojo {
     protected boolean hideGroupId;
 
     /**
+     * A comma separated list of group Ids to include. If this parameter
+     * is specified, any group Id not matching will  be excluded.
+     * A '*' can be appended <b>only</b> at the end to match subgroups<br/>
+     * For example: <code>com.apache,java.net.*</code>
+     * @parameter expression="${include-group-ids}"
+     */
+    protected String includeGroupIds;
+    
+    /**
+     * A comma separated list of group Ids to exclude. A '*' can be appended
+     * <b>only</b> at the end to match subgroups<br/>
+     * For example: <code>com.apache,java.net.*</code>
+     * @parameter expression="${exclude-group-ids}"
+     */
+    protected String excludeGroupIds;
+
+    /**
+     * A comma separated list of artifact Ids to include. If this parameter
+     * is specified, any artifact Id not matching will  be excluded.
+     * A '*' can be appended <b>only</b> at the end to match subgroups<br/>
+     * For example: <code>commons-*</code>
+     * @parameter expression="${include-artifact-ids}"
+     */
+    protected String includeArtifactIds;
+    
+    /**
+     * A comma separated list of artifact Ids to exclude. A '*' can be appended
+     * <b>only</b> at the end to match subgroups<br/>
+     * For example: <code>commons-*</code>
+     * @parameter expression="${exclude-artifact-ids}"
+     */
+    protected String excludeArtifactIds;
+
+    /**
      * If set to true then the module type label will not be drawn.
      * <br/>
      * @parameter default-value="false" expression="${hide-type}"
@@ -229,10 +263,34 @@ public class ProjectMojo extends AbstractMojo {
 
             if (hideScopes != null) {
                 for (String scope : hideScopes.split(",")) {
-                    visualizer.hideScopes.add(scope);
+                    visualizer.hideScopes.add(scope.trim());
                 }
             }
-
+            
+            if (excludeGroupIds != null) {
+               for (String groupId : excludeGroupIds.split(",")) {
+                  visualizer.excludeGroupIds.add(groupId.trim());
+               }
+            }
+            
+            if (includeGroupIds != null) {
+               for (String groupId : includeGroupIds.split(",")) {
+                  visualizer.includeGroupIds.add(groupId.trim());
+               }
+            }
+            
+            if (excludeArtifactIds != null) {
+               for (String artifactId : excludeArtifactIds.split(",")) {
+                  visualizer.excludeArtifactIds.add(artifactId.trim());
+               }
+            }
+            
+            if (includeArtifactIds != null) {
+               for (String artifactId : includeArtifactIds.split(",")) {
+                  visualizer.includeArtifactIds.add(artifactId.trim());
+               }
+            }
+            
             ArrayList<MavenProject> projects = new ArrayList<MavenProject>();
             collectProjects(projects);
 
@@ -246,7 +304,7 @@ public class ProjectMojo extends AbstractMojo {
             visualizer.export(getTarget());
             getLog().info("Dependency graph exported to: " + getTarget());
         } catch (DependencyTreeBuilderException e) {
-            throw new MojoExecutionException("Could not build the depedency tree.", e);
+            throw new MojoExecutionException("Could not build the dependency tree.", e);
         }
     }
 

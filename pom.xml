@@ -21,26 +21,32 @@
   <parent>
     <groupId>org.fusesource</groupId>
     <artifactId>fusesource-pom</artifactId>
-    <version>1.5</version>
+    <version>1.11</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>mvnplugins</artifactId>
-  <version>1.13-SNAPSHOT</version>
+  <version>1.40-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <name>FuseSource Maven Plugins</name>
   <description>A collection of random yet handy Maven plugins.</description>
 
   <modules>
-    <module>maven-graph-plugin</module>
+    <module>maven-provision-plugin</module>
     <module>maven-uberize-plugin</module>
+    <module>maven-linkchecker-plugin</module>
     <module>maven-avro-plugin</module>
     <module>fuse-javadoc-skin</module>
     <module>fuse-jxr-skin</module>
     <module>scala-mojo-support</module>
-    <module>maven-linkchecker-plugin</module>
     <module>maven-updatesite-plugin</module>
+    <module>maven-graph-plugin</module>
+    <module>maven-fab-plugin</module>
+    <module>maven-notices-plugin</module>
+    <module>maven-consolets-plugin</module>
+    <module>maven-bundle-summary-plugin</module>
+    <module>smartics-jboss-modules-maven-plugin</module>
   </modules>
 
   <properties>
@@ -48,7 +54,7 @@
     <forge-project-id-uc>MVNPLUGINS</forge-project-id-uc>
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <release-altGitURL>scm:git:ssh://git@forge.fusesource.com/${forge-project-id}.git</release-altGitURL>
+    <release-altGitURL>scm:git:git://github.com/fusesource/mvnplugins.git</release-altGitURL>
   </properties>
 
   <url>http://${forge-project-id}.fusesource.org</url>
@@ -86,9 +92,10 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git://forge.fusesource.com/${forge-project-id}.git</connection>
+    <connection>scm:git:git://github.com/fusesource/mvnplugins.git</connection>
     <developerConnection>${release-altGitURL}</developerConnection>
-    <url>http://github.com/chirino/mvnplugins/tree/master</url>
+    <url>http://github.com/fusesource/mvnplugins/tree/master</url>
+    <tag>HEAD</tag>
   </scm>
       
   <distributionManagement>
@@ -253,7 +260,33 @@
           <url>http://fluido-skin.googlecode.com/svn/repo/</url>
         </repository>
         
+        <repository>
+          <id>scala-tools.org</id>
+          <name>Scala-tools Maven2 Repository</name>
+          <url>http://scala-tools.org/repo-releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        
       </repositories>
+      
+      <pluginRepositories>
+        <pluginRepository>
+          <id>scala</id>
+          <name>Scala Tools</name>
+          <url>http://scala-tools.org/repo-releases</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>    
+      </pluginRepositories>      
     </profile>
     
   </profiles>

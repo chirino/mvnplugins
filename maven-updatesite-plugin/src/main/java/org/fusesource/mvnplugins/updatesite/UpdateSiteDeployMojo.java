@@ -28,15 +28,10 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.wagon.CommandExecutionException;
 import org.apache.maven.wagon.CommandExecutor;
 import org.apache.maven.wagon.ConnectionException;
-import org.apache.maven.wagon.ResourceDoesNotExistException;
-import org.apache.maven.wagon.TransferFailedException;
 import org.apache.maven.wagon.UnsupportedProtocolException;
 import org.apache.maven.wagon.Wagon;
-import org.apache.maven.wagon.authentication.AuthenticationException;
-import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.proxy.ProxyInfo;
 import org.apache.maven.wagon.repository.Repository;
@@ -54,6 +49,10 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Deploys an Eclipse update site using <code>scp</code> or <code>file</code>
@@ -83,10 +82,54 @@ public class UpdateSiteDeployMojo
     private File inputDirectory;
 
     /**
+     * Name of the generated .htaccess file to use
+     *
+     * @parameter alias="outputDirectory" expression="${project.build.directory}/updateSiteHtaccess"
+     * @required
+     */
+    private String htaccessFileName;
+
+    /**
+     * Whether to generate a new update site for each build using a date/time postfix.
+     * Defaults to "true".
+     *
+     * @parameter expression="${maven.updatesite.timestampDirectory}" default-value="true"
+     */
+    private boolean timestampDirectory;
+
+    /**
+     * Whether to generate a <code>.htaccess</code> file if using timestampDirectory mode
+     *
+     * @parameter expression="${maven.updatesite.generateHtaccess}" default-value="true"
+     */
+    private boolean generateHtaccess;
+
+    /**
+     * The name of the remote <code>.htaccess</code> file if using timestampDirectory mode.
+     *
+     * Defaults to ".htaccess".
+     *
+     * If your webdav provider won't let you upload files called ".htaccess" then you could
+     * configure this property to be something like "tmp.htacces" then you could later on rename the file
+     * using a cron job or something.
+     *
+     * @parameter expression="${maven.updatesite.remotehtAccessFile}" default-value=".htaccess"
+     */
+    private String remotehtAccessFile;
+
+    /**
+     * Whether to move the old directory out of the way before uploading the new one.
+     * Defaults to "false".
+     *
+     * @parameter expression="${maven.updatesite.moveOldDirectory}" default-value="false"
+     */
+    private boolean moveOldDirectory;
+
+    /**
      * Whether to run the "chmod" command on the remote site after the deploy.
      * Defaults to "true".
      *
-     * @parameter expression="${maven.site.chmod}" default-value="true"
+     * @parameter expression="${maven.updatesite.chmod}" default-value="true"
      * @since 2.1
      */
     private boolean chmod;
@@ -95,7 +138,7 @@ public class UpdateSiteDeployMojo
      * The mode used by the "chmod" command. Only used if chmod = true.
      * Defaults to "g+w,a+rX".
      *
-     * @parameter expression="${maven.site.chmod.mode}" default-value="g+w,a+rX"
+     * @parameter expression="${maven.updatesite.chmod.mode}" default-value="g+w,a+rX"
      * @since 2.1
      */
     private String chmodMode;
@@ -117,23 +160,39 @@ public class UpdateSiteDeployMojo
     private String remoteServerUrl;
 
     /**
-     * The path used relative to the distribution URL in maven.
-     * TODO...
-     * Defaults to ".." so that the module name of the maven project using this goal is not included in the URL.
-     * Configure to "." if you want to include the module name in the site URL
+     * The directory used to put the update site in. Defaults to "${project-version}".
      *
-     * @parameter default-value="."
+     * If you use the htacess generation then this directory is used as part of the redirects
+     *
+     * @parameter default-value="${project.version}"
      */
     private String remoteDirectory;
+
 
     /**
      * The options used by the "chmod" command. Only used if chmod = true.
      * Defaults to "-Rf".
      *
-     * @parameter expression="${maven.site.chmod.options}" default-value="-Rf"
+     * @parameter expression="${maven.updatesite.chmod.options}" default-value="-Rf"
      * @since 2.1
      */
     private String chmodOptions;
+
+    /**
+     * The options used by the "mv" command to move the current update site out of the way
+     * Defaults to "".
+     *
+     * @parameter expression="${maven.updatesite.mv.options}" default-value=""
+     * @since 2.1
+     */
+    private String mvOptions;
+
+    /**
+     * The date format to use for old build directories
+     *
+     * @parameter expression="${maven.updatesite.oldBuild.dateFormat}" default-value="yyyy-MM-dd-HH-mm-ss-SSS"
+     */
+    private String oldBuildDateFormat = "yyyy-MM-dd-HH-mm-ss-SSS";
 
     /**
      * @parameter expression="${project}"
@@ -166,29 +225,6 @@ public class UpdateSiteDeployMojo
         if (!inputDirectory.exists()) {
             throw new MojoExecutionException("The site does not exist, please run site:site first");
         }
-
-/*
-        DistributionManagement distributionManagement = project.getDistributionManagement();
-
-        if ( distributionManagement == null )
-        {
-            throw new MojoExecutionException( "Missing distribution management information in the project" );
-        }
-
-        Site site = distributionManagement.getSite();
-
-        if ( site == null )
-        {
-            throw new MojoExecutionException(
-                "Missing site information in the distribution management element in the project.." );
-        }
-
-        String url = site.getUrl();
-
-        String id = site.getId();
-
-*/
-
         String url = remoteServerUrl;
         String id = remoteServerId;
 
@@ -234,23 +270,69 @@ public class UpdateSiteDeployMojo
                 wagon.connect(repository, wagonManager.getAuthenticationInfo(id));
             }
 
-            wagon.putDirectory(inputDirectory, remoteDirectory);
+            SimpleDateFormat format = new SimpleDateFormat(oldBuildDateFormat);
+            String postfix = "-" + format.format(new Date());
 
-            if (chmod && wagon instanceof CommandExecutor) {
+            if (wagon instanceof CommandExecutor) {
                 CommandExecutor exec = (CommandExecutor) wagon;
-                exec.executeCommand("chmod " + chmodOptions + " " + chmodMode + " " + repository.getBasedir());
+                String repositoryBasedir = repository.getBasedir();
+
+                // lets move the old directory first before we push...
+                String fromDir = repositoryBasedir + "/" + remoteDirectory;
+                String newDir = repositoryBasedir + "/" + remoteDirectory + postfix;
+
+                if (moveOldDirectory) {
+                    getLog().info("Moving the current update site from: " + fromDir + " to: " + newDir);
+                    if (mvOptions == null) {
+                        mvOptions = "";
+                    }
+                    exec.executeCommand("mv " + mvOptions + " " + fromDir + " " + newDir);
+                }
+                wagon.putDirectory(inputDirectory, remoteDirectory);
+
+                if (chmod) {
+                    exec.executeCommand("chmod " + chmodOptions + " " + chmodMode + " " + repositoryBasedir);
+                }
+            } else {
+                if (moveOldDirectory && timestampDirectory) {
+                    String updateSiteDirectory = remoteDirectory + postfix;
+
+                    if (generateHtaccess) {
+                        PrintWriter out = new PrintWriter(new FileWriter(htaccessFileName));
+                        out.println("RewriteEngine on");
+                        out.println();
+
+                        /*
+                        String[] paths = remoteDirectory.split("/");
+                        int idx = paths.length - 1;
+                        String dirName = paths[idx];
+                        while ((dirName == "" || dirName == null) && --idx >= 0) {
+                            dirName = paths[idx];
+                        }
+                        if (dirName == "" || dirName == null) {
+                            getLog().warn("Could not deduce the last directory name ")
+                            dirName = "update";
+                        }
+                        */
+                        out.println("RewriteRule " + remoteDirectory + "/(.*) " + remoteDirectory + postfix + "/$1");
+                        out.close();
+
+                        getLog().info("Created .htaccess file " + htaccessFileName + " which will be uploaded to: " + remotehtAccessFile + " on completion");
+                    }
+
+                    wagon.putDirectory(inputDirectory, updateSiteDirectory);
+
+                    if (generateHtaccess) {
+                        getLog().info("Uploading .htaccess file " + htaccessFileName + " to: " + remotehtAccessFile);
+                        File htAccessFile = new File(htaccessFileName);
+                        wagon.put(htAccessFile, remotehtAccessFile);
+                    }
+                } else {
+                    wagon.putDirectory(inputDirectory, remoteDirectory);
+                }
             }
-        } catch (ResourceDoesNotExistException e) {
-            throw new MojoExecutionException("Error uploading site", e);
-        } catch (TransferFailedException e) {
-            throw new MojoExecutionException("Error uploading site", e);
-        } catch (AuthorizationException e) {
-            throw new MojoExecutionException("Error uploading site", e);
-        } catch (ConnectionException e) {
-            throw new MojoExecutionException("Error uploading site", e);
-        } catch (AuthenticationException e) {
-            throw new MojoExecutionException("Error uploading site", e);
-        } catch (CommandExecutionException e) {
+
+        } catch (Exception e) {
             throw new MojoExecutionException("Error uploading site", e);
         } finally {
             try {

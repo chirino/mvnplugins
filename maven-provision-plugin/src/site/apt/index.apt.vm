@@ -1,0 +1,85 @@
+ ------
+ Introduction
+ ------
+James Strachan
+ ------
+ 2009-09-30
+ ------
+
+~~ Copyright (C) 2009 Progress Software, Inc.
+~~ http://fusesource.com
+~~ 
+~~ Licensed under the Apache License, Version 2.0 (the "License");
+~~ you may not use this file except in compliance with the License.
+~~ You may obtain a copy of the License at
+~~ 
+~~    http://www.apache.org/licenses/LICENSE-2.0
+~~ 
+~~ Unless required by applicable law or agreed to in writing, software
+~~ distributed under the License is distributed on an "AS IS" BASIS,
+~~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~~ See the License for the specific language governing permissions and
+~~ limitations under the License.
+
+Maven Provision Plugin
+
+  This plugin provides the capability to provision the artifact in your build
+  to a directory on the file system so that it can be installed into the hotdeploy directory
+  in your application server such as Tomcat / Jetty / Karaf / ServiceMix
+
+* Usage
+
+  The plugin is designed to be usable in any project, so there's no need to hack your pom.xml
+
+  Try the following command in any project which makes a deployment artifact (jar, bundle, war etc)
+
++-----
+ mvn org.fusesource.mvnplugins:maven-provision-plugin:provision -DoutputDirectory=/foo
++-----
+
+  Where /foo is the directory you want to provision your artifact to.
+
+  Typically you may end up provisioning lots of artifacts from different projects into the same directory in the same container
+  so rather than having to specify the directory every time you can define profiles
+
+* edit ~/.m2/settings.xml
+
+  Add the following profiles for example...
+
++-----
+<settings>
+  <profiles>
+    <profile>
+      <id>karaf</id>
+      <properties>
+        <outputDirectory>/tmp/karaf</outputDirectory>
+      </properties>
+    </profile>
+    <profile>
+      <id>tomcat</id>
+      <properties>
+        <outputDirectory>/tmp/tomcat</outputDirectory>
+      </properties>
+    </profile>
+  </profiles>
+
+  <activeProfiles>
+    <activeProfile>karaf</activeProfile>
+  </activeProfiles>
+
+...
++-----
+
+  Now you can omit the outputDirectory property and it will use karaf by default...
+
++-----
+ mvn org.fusesource.mvnplugins:maven-provision-plugin:provision
++-----
+
+  If you want to you can provision to tomcat via
+
++-----
+ mvn org.fusesource.mvnplugins:maven-provision-plugin:provision -Ptomcat
++-----
+
+  Use whatever names for the maven profiles you wish :)

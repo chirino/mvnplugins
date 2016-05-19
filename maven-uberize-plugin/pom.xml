@@ -23,12 +23,12 @@ under the License.
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.13-SNAPSHOT</version>
+    <version>1.40-SNAPSHOT</version>
   </parent>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>maven-uberize-plugin</artifactId>
-  <version>1.13-SNAPSHOT</version>
+  <version>1.40-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Uberize Plugin</name>
@@ -110,6 +110,14 @@ under the License.
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    
+    
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>3.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
