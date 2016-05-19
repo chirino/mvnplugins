@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -20,6 +21,7 @@ import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Exclusion;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.DefaultModelWriter;
 import org.apache.maven.model.io.ModelWriter;
 import org.apache.maven.project.MavenProject;
@@ -135,7 +137,11 @@ public class DependencyPom {
             request.setBaseDirectory(file.getParentFile());
             request.setLocalRepositoryDirectory(new File(localRepository.getBasedir()));
             request.setGoals(Collections.singletonList("package"));
-            request.setProfiles(project.getActiveProfiles());
+            List<String> profiles = new LinkedList<String>();
+            for (Profile p : project.getActiveProfiles()) {
+                profiles.add(p.getId());
+            }
+            request.setProfiles(profiles);
             request.setShellEnvironmentInherited(true);
             if (session.getRequest().getUserSettingsFile().exists()) {
                 request.setUserSettingsFile(session.getRequest().getUserSettingsFile());
