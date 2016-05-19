@@ -20,14 +20,14 @@
   <parent>
     <groupId>org.fusesource.mvnplugins</groupId>
     <artifactId>mvnplugins</artifactId>
-    <version>1.39</version>
+    <version>1.40-SNAPSHOT</version>
   </parent>
   
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.fusesource.mvnplugins</groupId>
   <artifactId>fuse-javadoc-skin</artifactId>
-  <version>1.39</version>
+  <version>1.40-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <name>${project.artifactId}</name>
